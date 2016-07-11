@@ -28,7 +28,7 @@ class build_ext(_build_ext):
         self.include_dirs.append(numpy.get_include())
 
 setup(name='zwatershed',
-      version='0.7',
+      version='0.8',
       description='Fast watersheds',
       url='https://github.com/TuragaLab/zwatershed',
       author='Chandan Singh',

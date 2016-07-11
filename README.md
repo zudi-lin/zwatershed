@@ -8,6 +8,7 @@
 
 ### pip [<img src="https://img.shields.io/pypi/v/zwatershed.svg?maxAge=2592000">](https://pypi.python.org/pypi/zwatershed/)
 - `pip install zwatershed`
+- $3^5$
 
 ### from source
 - clone the repository

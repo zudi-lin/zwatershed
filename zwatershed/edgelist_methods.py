@@ -4,9 +4,9 @@ import numpy as np
 # -------------- edgelist methods --------------------------------------------------------------
 def nodelist_like(shape, nhood):
     nEdge = nhood.shape[0]
-    nodes = np.arange(np.prod(shape), dtype=np.uint32).reshape(shape)
+    nodes = np.arange(np.prod(shape), dtype=np.uint64).reshape(shape)
     node1 = np.tile(nodes, (nEdge, 1, 1, 1))
-    node2 = np.full(node1.shape, -1, dtype=np.uint32)
+    node2 = np.full(node1.shape, -1, dtype=np.uint64)
 
     for e in range(nEdge):
         node2[e, \

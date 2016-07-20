@@ -47,14 +47,14 @@ std::map<std::string,std::list<float>> zwshed_initial_c(const int dimX, const in
     std::cout << "calculating basic watershed..." << std::endl;
 
     // read data
-    volume_ptr<uint32_t> seg_ref;
+    volume_ptr<uint64_t> seg_ref;
     std::vector<std::size_t> counts_ref;
     affinity_graph_ptr<float> aff(new affinity_graph<float>
                               (boost::extents[dimX][dimY][dimZ][3],
                                boost::fortran_storage_order()));
     for(int i=0;i<dimX*dimY*dimZ*3;i++)
         aff->data()[i] = affs[i];
-    std::tie(seg_ref , counts_ref) = watershed<uint32_t>(aff, LOW, HIGH);
+    std::tie(seg_ref , counts_ref) = watershed<uint64_t>(aff, LOW, HIGH);
 
 
     // calculate region graph
@@ -82,14 +82,14 @@ std::map<std::string,std::list<float>> zwshed_initial_c(const int dimX, const in
  }
 
 
-std::map<std::string,std::vector<double>> merge_with_stats(int dimX,int dimY, int dimZ, uint32_t * gt, float * rgn_graph,
-int rgn_graph_len, uint32_t * seg_in, uint32_t*counts_in, int counts_len, int thresh){
+std::map<std::string,std::vector<double>> merge_with_stats(int dimX,int dimY, int dimZ, uint64_t * gt, float * rgn_graph,
+int rgn_graph_len, uint64_t * seg_in, uint64_t*counts_in, int counts_len, int thresh){
 
     //read data
-    volume_ptr<uint32_t> gt_ptr(new volume<uint32_t> (boost::extents[dimX][dimY][dimZ], boost::fortran_storage_order()));
-    volume_ptr<uint32_t> seg(new volume<uint32_t> (boost::extents[dimX][dimY][dimZ], boost::fortran_storage_order()));
+    volume_ptr<uint64_t> gt_ptr(new volume<uint64_t> (boost::extents[dimX][dimY][dimZ], boost::fortran_storage_order()));
+    volume_ptr<uint64_t> seg(new volume<uint64_t> (boost::extents[dimX][dimY][dimZ], boost::fortran_storage_order()));
     std::vector<std::size_t> counts = * new std::vector<std::size_t>();
-    region_graph_ptr<uint32_t,float> rg( new region_graph<uint32_t,float> );
+    region_graph_ptr<uint64_t,float> rg( new region_graph<uint64_t,float> );
     for(int i=0;i<dimX*dimY*dimZ;i++){
         gt_ptr->data()[i] = gt[i];
         seg->data()[i] = seg_in[i];
@@ -129,13 +129,13 @@ int rgn_graph_len, uint32_t * seg_in, uint32_t*counts_in, int counts_len, int th
 }
 
 std::map<std::string,std::vector<double>> merge_no_stats(int dimX, int dimY, int dimZ, float * rgn_graph,
-                                        int rgn_graph_len, uint32_t * seg_in, uint32_t*counts_in, int counts_len, int thresh){
+                                        int rgn_graph_len, uint64_t * seg_in, uint64_t*counts_in, int counts_len, int thresh){
     std::cout << "evaluating..." << std::endl;
 
     // read data
-    volume_ptr<uint32_t> seg(new volume<uint32_t> (boost::extents[dimX][dimY][dimZ], boost::fortran_storage_order()));
+    volume_ptr<uint64_t> seg(new volume<uint64_t> (boost::extents[dimX][dimY][dimZ], boost::fortran_storage_order()));
     std::vector<std::size_t> counts = * new std::vector<std::size_t>();
-    region_graph_ptr<uint32_t,float> rg( new region_graph<uint32_t,float> );
+    region_graph_ptr<uint64_t,float> rg( new region_graph<uint64_t,float> );
     for(int i=0;i<dimX*dimY*dimZ;i++)
         seg->data()[i] = seg_in[i];
     for(int i=0;i<counts_len;i++)
@@ -172,13 +172,13 @@ std::map<std::string,std::vector<double>> merge_no_stats(int dimX, int dimY, int
 
 
 
-std::map<std::string,std::list<float>> zwshed_initial_c_arb(const int dimX, const int dimY, const int dimZ, const uint32_t*node1,
-                                               const uint32_t*node2, const float*edgeWeight, const int n_edge){
+std::map<std::string,std::list<float>> zwshed_initial_c_arb(const int dimX, const int dimY, const int dimZ, const uint64_t*node1,
+                                               const uint64_t*node2, const float*edgeWeight, const int n_edge){
     // read data
     std::cout << "calculating basic watershed..." << std::endl;
-    volume_ptr<uint32_t> seg_ref;
+    volume_ptr<uint64_t> seg_ref;
     std::vector<std::size_t> counts_ref;
-    std::tie(seg_ref , counts_ref) = watershed_arb<uint32_t>(dimX,dimY,dimZ,node1, node2, edgeWeight, n_edge, LOW, HIGH);
+    std::tie(seg_ref , counts_ref) = watershed_arb<uint64_t>(dimX,dimY,dimZ,node1, node2, edgeWeight, n_edge, LOW, HIGH);
     auto seg = *seg_ref;
 
     // calculate region graph
@@ -209,14 +209,14 @@ std::map<std::string,std::list<float>> zwshed_initial_c_arb(const int dimX, cons
  }
 
 
-std::map<std::string,std::vector<double>> merge_with_stats_arb(int dimX,int dimY, int dimZ, uint32_t * gt, float * rgn_graph,
-int rgn_graph_len, uint32_t * seg_in, uint32_t*counts_in, int counts_len, int thresh){
+std::map<std::string,std::vector<double>> merge_with_stats_arb(int dimX,int dimY, int dimZ, uint64_t * gt, float * rgn_graph,
+int rgn_graph_len, uint64_t * seg_in, uint64_t*counts_in, int counts_len, int thresh){
 
     //read data
-    volume_ptr<uint32_t> gt_ptr(new volume<uint32_t> (boost::extents[dimX][dimY][dimZ], boost::c_storage_order() )); //, boost::fortran_storage_order()));
-    volume_ptr<uint32_t> seg(new volume<uint32_t> (boost::extents[dimX][dimY][dimZ], boost::c_storage_order()));
+    volume_ptr<uint64_t> gt_ptr(new volume<uint64_t> (boost::extents[dimX][dimY][dimZ], boost::c_storage_order() )); //, boost::fortran_storage_order()));
+    volume_ptr<uint64_t> seg(new volume<uint64_t> (boost::extents[dimX][dimY][dimZ], boost::c_storage_order()));
     std::vector<std::size_t> counts = * new std::vector<std::size_t>();
-    region_graph_ptr<uint32_t,float> rg( new region_graph<uint32_t,float> );
+    region_graph_ptr<uint64_t,float> rg( new region_graph<uint64_t,float> );
     for(int i=0;i<dimX*dimY*dimZ;i++){
         gt_ptr->data()[i] = gt[i];
         seg->data()[i] = seg_in[i];
@@ -257,12 +257,12 @@ int rgn_graph_len, uint32_t * seg_in, uint32_t*counts_in, int counts_len, int th
 }
 
 std::map<std::string,std::vector<double>> merge_no_stats_arb(int dimX,int dimY, int dimZ, float * rgn_graph,
-int rgn_graph_len, uint32_t * seg_in, uint32_t*counts_in, int counts_len, int thresh){
+int rgn_graph_len, uint64_t * seg_in, uint64_t*counts_in, int counts_len, int thresh){
 
     //read data
-    volume_ptr<uint32_t> seg(new volume<uint32_t> (boost::extents[dimX][dimY][dimZ]));
+    volume_ptr<uint64_t> seg(new volume<uint64_t> (boost::extents[dimX][dimY][dimZ]));
     std::vector<std::size_t> counts = * new std::vector<std::size_t>();
-    region_graph_ptr<uint32_t,float> rg( new region_graph<uint32_t,float> );
+    region_graph_ptr<uint64_t,float> rg( new region_graph<uint64_t,float> );
     for(int i=0;i<dimX*dimY*dimZ;i++){
         seg->data()[i] = seg_in[i];
     }

@@ -31,11 +31,11 @@ def init():
     # ----------------------------- load/shape data ------------------------------------
     # hdf5_gt = h5py.File(hdf5_gt_file, 'r')
     # hdf5_aff = h5py.File(hdf5_pred_file, 'r')
-    # gt = np.asarray(hdf5_gt[hdf5_gt.keys()[0]], dtype='uint32')
+    # gt = np.asarray(hdf5_gt[hdf5_gt.keys()[0]], dtype='uint64')
     # aff = np.asarray(hdf5_aff[hdf5_aff.keys()[0]], dtype='float32')
     # aff = aff[:, p1:(-1 * p1), p2:(-1 * p2), p3:(-1 * p3)]
     # gt = trim_arbitrary_aff(gt, aff)
-    gt = np.random.randint(0,high=30,size=(30,30,30)).astype('uint32')
+    gt = np.random.randint(0,high=30,size=(30,30,30)).astype('uint64')
     aff = np.random.rand(3,30,30,30).astype('float32')
     nhood = mknhood3d(1)
     node1, node2, edge_affs = affgraph_to_edgelist(aff, nhood)

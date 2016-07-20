@@ -29,8 +29,8 @@ using namespace std;
 
 std::pair<double,double>
 compare_volumes(
-                 volume<uint32_t>& gt,
-                 volume<uint32_t>& ws, int dimX, int dimY, int dimZ ){
+                 volume<uint64_t>& gt,
+                 volume<uint64_t>& ws, int dimX, int dimY, int dimZ ){
     double rand_split = 0;
     double rand_merge = 0;
 
@@ -38,16 +38,16 @@ compare_volumes(
     double s_sq = 0;
 
     double total = 0;
-    std::map<uint32_t, std::map<uint32_t, std::size_t>> p_ij;
+    std::map<uint64_t, std::map<uint64_t, std::size_t>> p_ij;
 
-    std::map<uint32_t, std::size_t> s_i, t_j;
+    std::map<uint64_t, std::size_t> s_i, t_j;
 
     for ( std::ptrdiff_t z = 0; z < dimZ; ++z )
         for ( std::ptrdiff_t y = 0; y < dimY; ++y )
             for ( std::ptrdiff_t x = 0; x < dimX; ++x )
             {
-                uint32_t wsv = ws[x][y][z];
-                uint32_t gtv = gt[x][y][z];
+                uint64_t wsv = ws[x][y][z];
+                uint64_t gtv = gt[x][y][z];
 
                 if ( gtv )
                 {
@@ -93,7 +93,7 @@ using namespace std;
 
 struct Vertex
 {
-    uint32_t first, second;
+    uint64_t first, second;
     float value;
 };
 

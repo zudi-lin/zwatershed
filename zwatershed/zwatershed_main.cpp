@@ -101,7 +101,8 @@ int rgn_graph_len, uint64_t * seg_in, uint64_t*counts_in, int counts_len, int th
 
     // merge
     std::cout << "thresh: " << thresh << "\n";
-	merge_segments_with_function(seg, rg, counts, square(thresh), 10,RECREATE_RG);
+    double t = (double) thresh;
+	merge_segments_with_function(seg, rg, counts, square(t), 10,RECREATE_RG);
 
     // save
     std::map<std::string,std::vector<double>> returnMap;
@@ -145,7 +146,8 @@ std::map<std::string,std::vector<double>> merge_no_stats(int dimX, int dimY, int
 
     // merge
     std::cout << "thresh: " << thresh << "\n";
-	merge_segments_with_function(seg, rg, counts, square(thresh), 10,RECREATE_RG);
+    double t = (double) thresh;
+	merge_segments_with_function(seg, rg, counts, square(t), 10,RECREATE_RG);
 
 	// save and return
 	std::map<std::string,std::vector<double>> returnMap;
@@ -228,7 +230,8 @@ int rgn_graph_len, uint64_t * seg_in, uint64_t*counts_in, int counts_len, int th
 
     // merge
     std::cout << "thresh: " << thresh << "\n";
-	merge_segments_with_function(seg, rg, counts, square(thresh), 10,RECREATE_RG);
+    double t = (double) thresh;
+	merge_segments_with_function(seg, rg, counts, square(t), 10,RECREATE_RG);
 
     // save
     std::map<std::string,std::vector<double>> returnMap;
@@ -273,7 +276,8 @@ int rgn_graph_len, uint64_t * seg_in, uint64_t*counts_in, int counts_len, int th
 
     // merge
     std::cout << "thresh: " << thresh << "\n";
-	merge_segments_with_function(seg, rg, counts, square(thresh), 10,RECREATE_RG);
+    double t = (double) thresh;
+	merge_segments_with_function(seg, rg, counts, square(t), 10,RECREATE_RG);
 
     // save
     std::map<std::string,std::vector<double>> returnMap;

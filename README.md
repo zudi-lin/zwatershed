@@ -29,6 +29,11 @@
 			- `len(rand['V_Rand_split']) == len(eval_thresh_list)`
 		- `rand['V_Rand_merge']`: list of score values, 
 			- `len(rand['V_Rand_merge']) == len(eval_thresh_list)`
+		- `rand['V_Info']`:  V_Info score (scalar)
+			- `rand['V_Info_split']`: list of score values
+			- `len(rand['V_Info_split']) == len(eval_thresh_list)`
+		- `rand['V_Info_merge']`: list of score values, 
+			- `len(rand['V_Info_merge']) == len(eval_thresh_list)`
 - `segs = zwatershed(aff_graph, seg_save_thresh_list)` 
 		- *returns segmentations*
 	- `segs`: list of segmentations

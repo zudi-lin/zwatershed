@@ -81,7 +81,7 @@ def zwshed_with_stats(np.ndarray[uint64_t, ndim=3] gt, np.ndarray[np.float32_t, 
     dims = affs.shape
 
     # get segs, stats
-    segs, splits, merges = [], [], []
+    segs, splits, merges, info_splits, info_merges = [], [], [], [], []
     for i in range(len(threshes)):
         if(len(rgn_graph) > 0):
             map = merge_with_stats(dims[0], dims[1], dims[2], &gt[0, 0, 0], &rgn_graph[0, 0],
@@ -101,12 +101,19 @@ def zwshed_with_stats(np.ndarray[uint64_t, ndim=3] gt, np.ndarray[np.float32_t, 
                 segs.append(seg)
         splits = splits + [map['stats'][0]]
         merges = merges + [map['stats'][1]]
+        info_splits = info_splits + [map['stats'][2]]
+        info_merges = info_merges + [map['stats'][3]]
     max_f_score = 2 / (1 / splits[0] + 1 / merges[0])
+    max_v_info = 2 / (1 / info_splits[0] + 1 / info_merges[0])
     for j in range(len(splits)):
         f_score = 2 / (1 / splits[j] + 1 / merges[j])
         if f_score > max_f_score:
             max_f_score = f_score
-    returnMap = {'V_Rand': max_f_score, 'V_Rand_split': splits, 'V_Rand_merge': merges}
+        info_score = 2 / (1 / info_splits[j] + 1 / info_merges[j])
+        if info_score > max_v_info:
+            max_v_info = info_score
+        
+    returnMap = {'V_Rand': max_f_score, 'V_Rand_split': splits, 'V_Rand_merge': merges, 'V_Info_split':info_splits, 'V_Info_merge':info_merges, 'V_Info':max_v_info}
     if h5:
         return returnMap
     else:

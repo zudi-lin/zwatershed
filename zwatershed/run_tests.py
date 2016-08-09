@@ -45,7 +45,8 @@ def init():
 # ------------------------------ run tests -------------------------------------
 def main():
     args = init()
-    test_eval(args)
+    segs_old, rand_old, segs_new, rand_new = test_eval(args)
+    print "rand",rand_old
     # test_no_eval(args)
     # test_h5_eval(args)
     # test_h5_no_eval(args)

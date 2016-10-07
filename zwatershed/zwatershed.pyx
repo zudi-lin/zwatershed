@@ -271,18 +271,18 @@ def zwshed_initial_arb(np.ndarray[uint64_t, ndim=3] seg, np.ndarray[uint64_t, nd
 
 #-------------- c++ methods --------------------------------------------------------------
 cdef extern from "zwatershed.h":
-    map[string, list[float]] zwshed_initial_c(int dimX, int dimY, int dimZ, np.float32_t*affs)
-    map[string, vector[double]] merge_with_stats(int dx, int dy, int dz, np.uint64_t*gt,
+    map[string, list[float]] zwshed_initial_c(size_t dimX, size_t dimY, size_t dimZ, np.float32_t*affs)
+    map[string, vector[double]] merge_with_stats(size_t dx, size_t dy, size_t dz, np.uint64_t*gt,
                                                  np.float32_t*rgn_graph, int rgn_graph_len, uint64_t*seg,
                                                  uint64_t*counts, int counts_len, int thresh)
-    map[string, vector[double]] merge_no_stats(int dx, int dy, int dz,
+    map[string, vector[double]] merge_no_stats(size_t dx, size_t dy, size_t dz,
                                                np.float32_t*rgn_graph, int rgn_graph_len, uint64_t*seg,
                                                uint64_t*counts, int counts_len, int thresh)
-    map[string, list[float]] zwshed_initial_c_arb(int dimX, int dimY, int dimZ, uint64_t*node1,
+    map[string, list[float]] zwshed_initial_c_arb(size_t dimX, size_t dimY, size_t dimZ, uint64_t*node1,
                                                   uint64_t*node2, float*edgeWeight, int n_edge)
-    map[string, vector[double]] merge_with_stats_arb(int dx, int dy, int dz, np.uint64_t*gt,
+    map[string, vector[double]] merge_with_stats_arb(size_t dx, size_t dy, size_t dz, np.uint64_t*gt,
                                                      np.float32_t*rgn_graph, int rgn_graph_len, uint64_t*seg,
                                                      uint64_t*counts, int counts_len, int thresh)
-    map[string, vector[double]] merge_no_stats_arb(int dx, int dy, int dz,
+    map[string, vector[double]] merge_no_stats_arb(size_t dx, size_t dy, size_t dz,
                                                    np.float32_t*rgn_graph, int rgn_graph_len, uint64_t*seg,
                                                    uint64_t*counts, int counts_len, int thresh)

@@ -10,21 +10,21 @@
 
 
 
-std::map<std::string,std::list<float>> zwshed_initial_c(const int dx, const int dy, const int dz, float* affs);
+std::map<std::string,std::list<float>> zwshed_initial_c(const size_t dx, const size_t dy, const size_t dz, float* affs);
 
-std::map<std::string,std::vector<double>> merge_with_stats(int dx,int dy, int dz, uint64_t * gt, float * rgn_graph,
+std::map<std::string,std::vector<double>> merge_with_stats(size_t dx,size_t dy, size_t dz, uint64_t * gt, float * rgn_graph,
                                         int rgn_graph_len, uint64_t * seg_in, uint64_t*counts, int counts_len, int thresh);
 
-std::map<std::string,std::vector<double>> merge_no_stats(int dimX, int dimY, int dimZ, float * rgn_graph,
+std::map<std::string,std::vector<double>> merge_no_stats(size_t dimX, size_t dimY, size_t dimZ, float * rgn_graph,
                                         int rgn_graph_len, uint64_t * seg_in, uint64_t*counts, int counts_len, int thresh);
 
-std::map<std::string,std::list<float>> zwshed_initial_c_arb(const int dx, const int dy, const int dz, const uint64_t*node1,
+std::map<std::string,std::list<float>> zwshed_initial_c_arb(const size_t dx, const size_t dy, const size_t dz, const uint64_t*node1,
                                                const uint64_t*node2, const float*edgeWeight, const int n_edge);
 
-std::map<std::string,std::vector<double>> merge_with_stats_arb(int dx,int dy, int dz, uint64_t * gt, float * rgn_graph,
+std::map<std::string,std::vector<double>> merge_with_stats_arb(size_t dx,size_t dy, size_t dz, uint64_t * gt, float * rgn_graph,
                                         int rgn_graph_len, uint64_t * seg_in, uint64_t*counts, int counts_len, int thresh);
 
-std::map<std::string,std::vector<double>> merge_no_stats_arb(int dx,int dy, int dz, float * rgn_graph,
+std::map<std::string,std::vector<double>> merge_no_stats_arb(size_t dx,size_t dy, size_t dz, float * rgn_graph,
                                         int rgn_graph_len, uint64_t * seg_in, uint64_t*counts, int counts_len, int thresh);
 
 #endif

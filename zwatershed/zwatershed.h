@@ -9,9 +9,14 @@
 #include <utility>
 
 
+std::map<std::string,std::list<float>> zwshed_initial_c_dw(const size_t dx, const size_t dy, const size_t dz, float* affs,
+                                                float thres_low, float thres_high);
+std::map<std::string,std::vector<double>> merge_no_stats_dw(size_t dimX, size_t dimY, size_t dimZ, float * rgn_graph,
+                                        int rgn_graph_len, uint64_t * seg_in, uint64_t*counts, int counts_len, 
+                                        int thresh, float T_aff_merge, int T_dust);
+// ------------
 
 std::map<std::string,std::list<float>> zwshed_initial_c(const size_t dx, const size_t dy, const size_t dz, float* affs);
-
 std::map<std::string,std::vector<double>> merge_with_stats(size_t dx,size_t dy, size_t dz, uint64_t * gt, float * rgn_graph,
                                         int rgn_graph_len, uint64_t * seg_in, uint64_t*counts, int counts_len, int thresh);
 

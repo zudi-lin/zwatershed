@@ -1,0 +1,2 @@
+/n/home04/donglai/.conda/envs/zwatershed/lib/python2.7/site-packages/zwatershed.so
+/n/home04/donglai/.conda/envs/zwatershed/lib/python2.7/site-packages/UNKNOWN-0.0.0-py2.7.egg-info

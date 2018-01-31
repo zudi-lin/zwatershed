@@ -24,8 +24,11 @@ if __name__ == "__main__" :
     thd = [int(x) for x in sys.argv[4].split('_')]	
     aff_thd = [float(x) for x in sys.argv[5].split('_')]	
     dust_thd = int(sys.argv[6])
+    T_aff_relative = int(sys.argv[7]) != 0
     
     #mask_file = prediction_file[:-7]+'mask.h5'
     p = readh5(prediction_file, prediction_dataset)
     print "Performing watershed"
-    zwatershed.zwatershed_dw(p,thd, aff_thd, dust_thd, seg_save_path=watershed_file)
+    zwatershed.zwatershed_dw(p,thd, aff_thd, dust_thd, 
+                             seg_save_path=watershed_file, 
+                             T_aff_relative=T_aff_relative)

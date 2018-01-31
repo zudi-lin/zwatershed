@@ -55,12 +55,13 @@ template< typename ID, typename F> inline void mergerg(
       rset.insert(p);
     }
   }
-  std::cout << "Finished building rset and rd" << std::endl 
+  std::cout << "Found " << rset.size() << " parents" << std::endl 
+            << "Merged " << rd.size() << " children" << std::endl
             << "Relabeling voxels" << std::endl << std::flush;
   num = 0;
   for (auto plane:*seg_ptr) {
     for (auto raster:plane) {
-      for (auto voxel:raster) {
+      for (ID &voxel:raster) {
         if (rd.count(voxel) > 0) {
           voxel = rd[voxel];
           ++num;

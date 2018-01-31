@@ -28,4 +28,4 @@ if __name__ == "__main__" :
     #mask_file = prediction_file[:-7]+'mask.h5'
     p = readh5(prediction_file, prediction_dataset)
     print "Performing watershed"
-    zwatershed.zwatershed_dw(p,thd, aff_thd, dust_thd, watershed_file)
+    zwatershed.zwatershed_dw(p,thd, aff_thd, dust_thd, seg_save_path=watershed_file)

@@ -61,28 +61,35 @@ std::map<std::string,std::list<float>> zwshed_initial_c_dw(const size_t dimX, co
     // calculate region graph
     std::cout << "calculating rgn graph..." << std::endl;
     auto rg = get_region_graph(aff, seg_ref , counts_ref.size()-1);
-
+    std::cout << "Finished calculating region graph" << std::endl;
     // save and return
     std::map<std::string,std::list<float>> returnMap;
-    std::list<float> rg_data = * (new std::list<float>());
+    std::list<float> empty;
+    returnMap["rg"] = empty;
+    std::list<float> &rg_data = returnMap["rg"];
     for ( const auto& e: *rg ){
         rg_data.push_back(std::get<1>(e));
         rg_data.push_back(std::get<2>(e));
         rg_data.push_back(std::get<0>(e));
     }
-    std::list<float> seg_data = * (new std::list<float>());
-    std::list<float> counts_data = * (new std::list<float>());
+    std::cout << "Copied region graph" << std::endl;
+    returnMap["seg"] = empty;
+    std::list<float> &seg_data = returnMap["seg"];
+    returnMap["counts"] = empty;
+    std::list<float> &counts_data = returnMap["counts"];
     for(size_t i=0;i<dimX*dimY*dimZ;i++)
         seg_data.push_back(seg_ref->data()[i]);
+    std::cout << "copied segmentation" << std::endl;
     for (const auto& x:counts_ref)
         counts_data.push_back(x);
-    returnMap["rg"]=rg_data;
-    returnMap["seg"]=seg_data;
-    returnMap["counts"]=counts_data;
+    std::cout << "copied counts" << std::endl;
+    std::cout << "Returning from zwshed_initial_c_dw" << std::endl;
     return returnMap;
  }
-std::map<std::string,std::vector<double>> merge_no_stats_dw(size_t dimX, size_t dimY, size_t dimZ, float * rgn_graph,
-                                        int rgn_graph_len, uint64_t * seg_in, uint64_t*counts_in, int counts_len, int thresh, float T_aff_merge, int T_dust){
+std::map<std::string,std::vector<double>> merge_no_stats_dw(
+    size_t dimX, size_t dimY, size_t dimZ, float * rgn_graph, int rgn_graph_len,
+    uint64_t * seg_in, uint64_t*counts_in, int counts_len, int thresh, 
+    float T_aff_merge, int T_dust, float T_merge) {
     std::cout << "evaluating..." << std::endl;
 
     // read data
@@ -98,7 +105,8 @@ std::map<std::string,std::vector<double>> merge_no_stats_dw(size_t dimX, size_t 
 
     // merge
     std::cout << "thresh: " << thresh << "\n";
-	merge_segments_with_function_dw(seg, rg, counts, thresh, T_aff_merge, T_dust ,RECREATE_RG);
+    rg = merge_segments_with_function_dw(
+	  seg, rg, counts, thresh, T_aff_merge, T_dust , T_merge);
 
 	// save and return
 	std::map<std::string,std::vector<double>> returnMap;

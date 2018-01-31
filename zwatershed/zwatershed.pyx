@@ -10,7 +10,11 @@ cimport numpy as np
 import h5py
 
 #-------------- interface methods --------------------------------------------------------------
-def zwatershed_dw(np.ndarray[np.float32_t, ndim=4] affs, threshes, T_aff=[0.01,0.8,0.2], T_dust=600, seg_save_path='./', T_aff_relative=True):
+def zwatershed_dw(np.ndarray[np.float32_t, ndim=4] affs, 
+                  threshes, T_aff=[0.01,0.8,0.2], 
+                  T_dust=600, 
+                  T_merge=0.5,
+                  seg_save_path='./', T_aff_relative=True):
     # aff stats
     affs = np.asfortranarray(np.transpose(affs, (1, 2, 3, 0)))
     dims = affs.shape
@@ -31,8 +35,10 @@ def zwatershed_dw(np.ndarray[np.float32_t, ndim=4] affs, threshes, T_aff=[0.01,0
     for i in range(len(threshes)):
         print "3. do thres: ", threshes[i], T_dust
         if(len(rgn_graph) > 0):
-            map = merge_no_stats_dw(dims[0], dims[1], dims[2], &rgn_graph[0, 0],
-                             rgn_graph.shape[0], &seg_in[0], &counts_out[0], len(map['counts']), threshes[i], affs_thres[2], T_dust)
+            map = merge_no_stats_dw(
+                dims[0], dims[1], dims[2], &rgn_graph[0, 0],
+                rgn_graph.shape[0], &seg_in[0], &counts_out[0], 
+                len(map['counts']), threshes[i], affs_thres[2], T_dust, T_merge)
         seg = np.array(map['seg'], dtype='uint64').reshape((dims[2], dims[1], dims[0])).transpose(2, 1, 0)
         graph = np.array(map['rg'], dtype='float32')
         counts_out = np.array(map['counts'], dtype='uint64')
@@ -322,7 +328,7 @@ cdef extern from "zwatershed.h":
 
     map[string, vector[double]] merge_no_stats_dw(size_t dx, size_t dy, size_t dz,
                                                np.float32_t*rgn_graph, int rgn_graph_len, uint64_t*seg,
-                                               uint64_t*counts, int counts_len, int thresh, float weight_th, int dust_size)
+                                               uint64_t*counts, int counts_len, int thresh, float weight_th, int dust_size, float merge_th)
     # ------------
     map[string, list[float]] zwshed_initial_c(size_t dimX, size_t dimY, size_t dimZ, np.float32_t*affs)
 

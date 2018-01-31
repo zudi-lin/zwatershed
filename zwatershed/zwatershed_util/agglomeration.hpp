@@ -1,19 +1,20 @@
 #pragma once
 
 #include "types.hpp"
-
+#include "mst.hpp"
+#include "mergerg.hpp"
 #include <zi/disjoint_sets/disjoint_sets.hpp>
 #include <map>
 #include <vector>
 #include <set>
 template< typename ID, typename F, typename M >
-inline void merge_segments_with_function_dw( const volume_ptr<ID>& seg_ptr,
+inline region_graph_ptr<ID, F> merge_segments_with_function_dw( const volume_ptr<ID>& seg_ptr,
                                           const region_graph_ptr<ID,F> rg_ptr,
                                           std::vector<std::size_t>& counts,
                                           const M& size_th,
                                           const F& weight_th,
                                           const M& lowt,
-                                          bool recreate_rg)
+                                          const F& merge_th)
 {
     zi::disjoint_sets<ID> sets(counts.size());
 
@@ -74,7 +75,8 @@ inline void merge_segments_with_function_dw( const volume_ptr<ID>& seg_ptr,
 
     std::cout << "\tDone with remapping, total: " << (next_id-1) << std::endl;
 
-    region_graph<ID,F> new_rg;
+    region_graph_ptr<ID,F> new_rg_ptr(new region_graph<ID, F>);
+    region_graph<ID, F> &new_rg=*new_rg_ptr;
 
     std::vector<std::set<ID>> in_rg(next_id);
 
@@ -94,11 +96,14 @@ inline void merge_segments_with_function_dw( const volume_ptr<ID>& seg_ptr,
         }
     }
 
-    if(recreate_rg)
-        rg.swap(new_rg);
+    new_rg_ptr = mst(new_rg_ptr, counts.size());
+    std::cout << "New region graph size after mst = " << new_rg_ptr->size() << std::endl;
+    mergerg(seg_ptr, new_rg_ptr, merge_th);
+    std::cout << "New region graph size after mergerg = " << new_rg_ptr->size() << std::endl;
 
     std::cout << "\tDone with updating the region graph, size: "
               << rg.size() << std::endl;
+    return new_rg_ptr;
 }
 template< typename ID, typename F, typename FN, typename M >
 inline void merge_segments_with_function( const volume_ptr<ID>& seg_ptr,
@@ -191,7 +196,6 @@ inline void merge_segments_with_function( const volume_ptr<ID>& seg_ptr,
             }
         }
     }
-
     if(recreate_rg)
         rg.swap(new_rg);
 

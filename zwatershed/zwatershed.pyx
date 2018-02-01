@@ -8,6 +8,8 @@ import numpy as np
 import os
 cimport numpy as np
 import h5py
+from cpython.object cimport PyObject
+from cython.operator cimport dereference as deref, preincrement as inc
 
 #-------------- interface methods --------------------------------------------------------------
 def zwatershed_dw(np.ndarray[np.float32_t, ndim=4] affs, 
@@ -346,3 +348,35 @@ cdef extern from "zwatershed.h":
     map[string, vector[double]] merge_no_stats_arb(size_t dx, size_t dy, size_t dz,
                                                    np.float32_t*rgn_graph, int rgn_graph_len, uint64_t*seg,
                                                    uint64_t*counts, int counts_len, int thresh)
+
+    void steepest_ascent(PyObject *aff, PyObject *seg, float low, float high)
+    void divide_plateaus(PyObject *seg)
+    void find_basins(PyObject *seg, vector[uint64_t] &counts)
+
+def zw_steepest_ascent(np.ndarray[np.float32_t, ndim=4] aff,
+                       low, high):
+    cdef:
+        PyObject *paff = <PyObject *>aff
+        PyObject *pseg;
+    seg = np.zeros((aff.shape[0], aff.shape[1], aff.shape[2]), np.uint64, order='F')
+    pseg = <PyObject *>seg
+    steepest_ascent(paff, pseg, low, high);
+    return seg
+
+def zw_divide_plateaus(np.ndarray[np.uint64_t, ndim=3] seg):
+    cdef:
+        PyObject *pseg = <PyObject *>seg
+    divide_plateaus(pseg);
+
+def zw_find_basins(np.ndarray[np.uint64_t, ndim=3] seg):
+    cdef:
+        PyObject *pseg=<PyObject *>seg
+        vector[uint64_t] counts
+        size_t i
+    
+    find_basins(pseg, counts)
+    print counts.size()
+    pycounts = np.zeros(counts.size(), np.uint64)
+    for i in range(len(pycounts)):
+        pycounts[i] = counts[i]
+    return pycounts

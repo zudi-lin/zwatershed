@@ -389,3 +389,55 @@ int rgn_graph_len, uint64_t * seg_in, uint64_t*counts_in, int counts_len, int th
     returnMap["counts"] = counts_data;
     return returnMap;
 }
+
+/*
+ * Affinity is organized into a 4-d array. The first index is the
+ * Z / Y / X affinity in question. This index is of length = 3.
+ * The remaining indices are the Z, Y and X coordinates.
+ */
+class affinity_t: public boost::multi_array_ref<float, 4> {
+    public:
+	typedef boost::multi_array_ref<float, 4> super;
+	affinity_t(PyArrayObject *a):super(
+	    (float *)PyArray_DATA(a), 
+	    boost::extents[PyArray_DIMS(a)[0]]
+			  [PyArray_DIMS(a)[1]]
+			  [PyArray_DIMS(a)[2]]
+			  [PyArray_DIMS(a)[3]]) {
+	    for (size_t i=0; i < 4; i++) {
+		stride_list_[i] = PyArray_STRIDE(a, i) / sizeof(float);
+	    }
+	}
+};
+/*
+ * The seeds and segmentation are hardcoded as uint32 for use by Python.
+ */
+class segmentation_t: public boost::multi_array_ref<uint64_t, 3> {
+    public:
+	typedef boost::multi_array_ref<uint64_t, 3> super;
+	segmentation_t(PyArrayObject *a):super(
+	    (uint64_t *)PyArray_DATA(a), 
+	    boost::extents[PyArray_DIMS(a)[0]]
+			 [PyArray_DIMS(a)[1]]
+			 [PyArray_DIMS(a)[2]]) {
+	    for (size_t i=0; i < 3; i++) {
+		stride_list_[i] = PyArray_STRIDE(a, i) / sizeof(uint64_t);
+	    }
+	}
+};
+
+void steepest_ascent(PyObject *pyaff, PyObject *pyseg, float low, float high) {
+    affinity_t aff((PyArrayObject *)pyaff);
+    segmentation_t seg((PyArrayObject *)pyseg);
+    steepestascent(aff, seg, low, high);
+}
+
+void divide_plateaus(PyObject *pyseg) {
+    segmentation_t seg((PyArrayObject *)pyseg);
+    divideplateaus(seg);
+}
+
+void find_basins(PyObject *pyseg, std::vector<uint64_t> &counts) {
+    segmentation_t seg((PyArrayObject *)pyseg);
+    findbasins(seg, counts);
+}

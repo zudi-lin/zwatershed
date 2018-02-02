@@ -18,7 +18,8 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
                   T_merge=0.5,
                   seg_save_path='./', T_aff_relative=True):
     # aff stats
-    affs = np.asfortranarray(np.transpose(affs, (1, 2, 3, 0)))
+    affs = np.asfortranarray(np.transpose(affs, (3, 2, 1, 0)))
+    #affs = np.asfortranarray(np.transpose(affs, (1, 2, 3, 0)))
     dims = affs.shape
     affs_thres = np.percentile(affs, T_aff) if T_aff_relative else T_aff
     print "1. affinity threshold: ", affs_thres
@@ -66,6 +67,7 @@ def zw_steepest_ascent(np.ndarray[np.float32_t, ndim=4] aff,
     cdef:
         PyObject *paff = <PyObject *>aff
         PyObject *pseg;
+    # input: x*y*z*3
     seg = np.zeros((aff.shape[0], aff.shape[1], aff.shape[2]), np.uint64, order='F')
     pseg = <PyObject *>seg
     steepest_ascent(paff, pseg, low, high);

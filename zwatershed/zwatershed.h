@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 #include <utility>
+#include <Python.h>
 #include "numpy/arrayobject.h"
 
 std::map<std::string,std::list<float>> zwshed_initial_c(const size_t dx, const size_t dy, const size_t dz, float* affs,

@@ -95,7 +95,7 @@ def zw_find_basins(np.ndarray[np.uint64_t, ndim=3] seg):
 def zw_get_region_graph(np.ndarray[np.float32_t, ndim=4] aff,
                         np.ndarray[np.uint64_t, ndim=3] seg,
                         max_segid):
-    '''Return the initial region graph.
+    '''Return the initial region graph using max edge affinity.
     
     :param aff: the affinity predictions - an array of x, y, z, c where c == 0
                 is the affinity prediction for x, c == 1 is the affinity
@@ -117,6 +117,40 @@ def zw_get_region_graph(np.ndarray[np.float32_t, ndim=4] aff,
         size_t i
     
     get_region_graph(paff, pseg, max_segid, rg_affs, id1, id2)
+    np_rg_affs = np.zeros(rg_affs.size(), np.float32)
+    np_id1 = np.zeros(id1.size(), np.uint64)
+    np_id2 = np.zeros(id2.size(), np.uint64)
+    for 0 <= i < rg_affs.size():
+        np_rg_affs[i] = rg_affs[i]
+        np_id1[i] = id1[i]
+        np_id2[i] = id2[i]
+    return (np_rg_affs, np_id1, np_id2)
+
+def zw_get_region_graph_average(np.ndarray[np.float32_t, ndim=4] aff,
+                                np.ndarray[np.uint64_t, ndim=3] seg,
+                                max_segid):
+    '''Return the initial region graph using average edge affinity
+    
+    :param aff: the affinity predictions - an array of x, y, z, c where c == 0
+                is the affinity prediction for x, c == 1 is the affinity
+                prediction for y and c == 2 is the affinity prediction for z
+    :param seg: the segmentation after finding basins
+    :param max_segid: the maximum ID in seg
+    :returns: a region graph as a 3-tuple of numpy 1-d arrays of affinity, 
+              ID1 and ID2
+    '''
+    cdef:
+        PyObject *pseg=<PyObject *>seg
+        PyObject *paff=<PyObject *>aff
+        vector[float] rg_affs
+        vector[uint64_t] id1
+        vector[uint64_t] id2
+        np.ndarray[np.float32_t, ndim=1] np_rg_affs
+        np.ndarray[np.uint64_t, ndim=1] np_id1
+        np.ndarray[np.uint64_t, ndim=1] np_id2
+        size_t i
+    
+    get_region_graph_average(paff, pseg, max_segid, rg_affs, id1, id2)
     np_rg_affs = np.zeros(rg_affs.size(), np.float32)
     np_id1 = np.zeros(id1.size(), np.uint64)
     np_id2 = np.zeros(id2.size(), np.uint64)
@@ -199,6 +233,9 @@ cdef extern from "zwatershed.h":
     void divide_plateaus(PyObject *seg)
     void find_basins(PyObject *seg, vector[uint64_t] &counts)
     void get_region_graph(
+        PyObject *aff, PyObject *seg, size_t max_segid, vector[float] &rg_affs,
+        vector[uint64_t] &id1, vector[uint64_t] &id2)
+    void get_region_graph_average(
         PyObject *aff, PyObject *seg, size_t max_segid, vector[float] &rg_affs,
         vector[uint64_t] &id1, vector[uint64_t] &id2)
     void merge_segments_with_function_dw(

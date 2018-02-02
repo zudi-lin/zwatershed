@@ -215,6 +215,17 @@ void get_region_graph(
     rg_to_vectors(*rg_ptr, rg_affs, id1, id2);
 }
 
+void get_region_graph_average(
+    PyObject *pyaff, PyObject *pyseg, std::size_t max_segid,
+    std::vector<float> &rg_affs, 
+    std::vector<uint64_t> &id1, std::vector<uint64_t> &id2) {
+	
+    affinity_t aff((PyArrayObject *)pyaff);
+    segmentation_t seg((PyArrayObject *)pyseg);
+    auto rg_ptr = get_region_graph_average(aff, seg, max_segid);
+    rg_to_vectors(*rg_ptr, rg_affs, id1, id2);
+}
+
 void merge_segments_with_function_dw(
      PyObject *pyseg,
      std::vector<float> &rg_affs,

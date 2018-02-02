@@ -240,20 +240,28 @@ inline void steepestascent(
             }
 }
 
+template< typename ID > inline std::ptrdiff_t get_strides(
+    boost::multi_array_ref<ID, 3> &seg, std::ptrdiff_t *dir) {
+    auto strides = seg.strides();
+    auto shape = seg.shape();
+    dir[0] = -strides[0];
+    dir[1] = -strides[1];
+    dir[2] = -strides[2];
+    dir[3] = strides[0];
+    dir[4] = strides[1];
+    dir[5] = strides[2];
+    return shape[0] * shape[1] * shape[2];
+}
+
 template< typename ID> inline void divideplateaus(
     boost::multi_array_ref<ID, 3> &seg) {
     using id_t       = ID;
     using traits     = watershed_traits<id_t>;
 
-    std::ptrdiff_t xdim = seg.shape()[0];
-    std::ptrdiff_t ydim = seg.shape()[1];
-    std::ptrdiff_t zdim = seg.shape()[2];
-
-    std::ptrdiff_t size = xdim * ydim * zdim;
- 
-    const std::ptrdiff_t dir[6] = { -1, -xdim, -xdim*ydim, 1, xdim, xdim*ydim };
+    std::ptrdiff_t dir[6];
     const id_t dirmask[6]  = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20 };
     const id_t idirmask[6] = { 0x08, 0x10, 0x20, 0x01, 0x02, 0x04 };
+    const std::ptrdiff_t size = get_strides(seg, dir);
     id_t* seg_raw = seg.data();
 
     std::cout << "get plateau corners" << std::endl;
@@ -329,14 +337,11 @@ template< typename ID, typename SIZE_T> inline void findbasins(
     std::vector<std::ptrdiff_t> bfs;
     counts.clear();
     counts.push_back(0);
-    std::ptrdiff_t xdim = seg.shape()[0];
-    std::ptrdiff_t ydim = seg.shape()[1];
-    std::ptrdiff_t zdim = seg.shape()[2];
 
-    std::ptrdiff_t size = xdim * ydim * zdim;
-    const std::ptrdiff_t dir[6] = { -1, -xdim, -xdim*ydim, 1, xdim, xdim*ydim };
+    std::ptrdiff_t dir[6];
     const id_t dirmask[6]  = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20 };
     const id_t idirmask[6] = { 0x08, 0x10, 0x20, 0x01, 0x02, 0x04 };
+    std::ptrdiff_t size = get_strides(seg, dir);
     
     for ( std::ptrdiff_t idx = 0; idx < size; ++idx )
     {

@@ -16,15 +16,16 @@
  * F - the type of the affinity weights
  *
  * Parameters:
- * seg_ptr - on input a pointer to the segmentation volume before merging,
+ * seg - on input a reference to the segmentation volume before merging,
  *           on output, the merged segmentation
  * rg_ptr - a pointer to the region graph pairs. This should be the maximal
  *          spanning tree of the original region graph.
  */
-template< typename ID, typename F> inline void mergerg(
-    const volume_ptr<ID>& seg_ptr,
-    const region_graph_ptr<ID, F> rg_ptr,
+template< typename VOLUME_T, typename F> inline void mergerg(
+    VOLUME_T& seg,
+    const region_graph_ptr< typename VOLUME_T::element, F> rg_ptr,
     F thd) {
+  using ID = typename VOLUME_T::element;
   std::map<ID, std::tuple<ID, F>> pd;
   std::cout << "Mergerg()" << std::endl << std::flush;
   size_t num = 0;
@@ -59,7 +60,7 @@ template< typename ID, typename F> inline void mergerg(
             << "Merged " << rd.size() << " children" << std::endl
             << "Relabeling voxels" << std::endl << std::flush;
   num = 0;
-  for (auto plane:*seg_ptr) {
+  for (auto plane:seg) {
     for (auto raster:plane) {
       for (ID &voxel:raster) {
         if (rd.count(voxel) > 0) {

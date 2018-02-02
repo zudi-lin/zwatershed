@@ -7,18 +7,19 @@
 #include <map>
 #include <vector>
 #include <set>
-template< typename ID, typename F, typename M >
-inline region_graph_ptr<ID, F> merge_segments_with_function_dw( const volume_ptr<ID>& seg_ptr,
-                                          const region_graph_ptr<ID,F> rg_ptr,
-                                          std::vector<std::size_t>& counts,
-                                          const M& size_th,
-                                          const F& weight_th,
-                                          const M& lowt,
-                                          const F& merge_th)
+template< typename VOLUME_T, typename F, typename M >
+inline region_graph_ptr<typename VOLUME_T::element, F> 
+merge_segments_with_function_dw( 
+    VOLUME_T &seg,
+    const region_graph<typename VOLUME_T::element,F> &rg,
+    std::vector<std::size_t>& counts,
+    const M& size_th,
+    const F& weight_th,
+    const M& lowt,
+    const F& merge_th)
 {
+    using ID=typename VOLUME_T::element;
     zi::disjoint_sets<ID> sets(counts.size());
-
-    region_graph<ID,F>& rg  = *rg_ptr;
 
     for ( auto& it: rg )
     {
@@ -60,17 +61,18 @@ inline region_graph_ptr<ID, F> merge_segments_with_function_dw( const volume_ptr
 
     counts.resize(next_id);
 
-    std::ptrdiff_t xdim = seg_ptr->shape()[0];
-    std::ptrdiff_t ydim = seg_ptr->shape()[1];
-    std::ptrdiff_t zdim = seg_ptr->shape()[2];
+    std::ptrdiff_t xdim = seg.shape()[0];
+    std::ptrdiff_t ydim = seg.shape()[1];
+    std::ptrdiff_t zdim = seg.shape()[2];
 
     std::ptrdiff_t total = xdim * ydim * zdim;
 
-    ID* seg_raw = seg_ptr->data();
-
-    for ( std::ptrdiff_t idx = 0; idx < total; ++idx )
-    {
-        seg_raw[idx] = remaps[sets.find_set(seg_raw[idx])];
+    for (auto plane:seg) {
+      for (auto raster:plane) {
+        for (ID &voxel:raster) {
+            voxel = remaps[sets.find_set(voxel)];
+        }
+      }
     }
 
     std::cout << "\tDone with remapping, total: " << (next_id-1) << std::endl;
@@ -98,7 +100,7 @@ inline region_graph_ptr<ID, F> merge_segments_with_function_dw( const volume_ptr
 
     new_rg_ptr = mst(new_rg_ptr, counts.size());
     std::cout << "New region graph size after mst = " << new_rg_ptr->size() << std::endl;
-    mergerg(seg_ptr, new_rg_ptr, merge_th);
+    mergerg(seg, new_rg_ptr, merge_th);
     std::cout << "New region graph size after mergerg = " << new_rg_ptr->size() << std::endl;
 
     std::cout << "\tDone with updating the region graph, size: "

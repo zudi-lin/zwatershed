@@ -60,7 +60,7 @@ std::map<std::string,std::list<float>> zwshed_initial_c(const size_t dimX, const
 
     // calculate region graph
     std::cout << "calculating rgn graph..." << std::endl;
-    auto rg = get_region_graph(aff, seg_ref , counts_ref.size()-1);
+    auto rg = get_region_graph(*aff, *seg_ref , counts_ref.size()-1);
     std::cout << "Finished calculating region graph" << std::endl;
     // save and return
     std::map<std::string,std::list<float>> returnMap;
@@ -106,7 +106,7 @@ std::map<std::string,std::vector<double>> merge_no_stats(
     // merge
     std::cout << "thresh: " << thresh << "\n";
     rg = merge_segments_with_function_dw(
-	  seg, rg, counts, thresh, T_aff_merge, T_dust , T_merge);
+	  *seg, *rg, counts, thresh, T_aff_merge, T_dust , T_merge);
 
 	// save and return
 	std::map<std::string,std::vector<double>> returnMap;
@@ -179,3 +179,58 @@ void find_basins(PyObject *pyseg, std::vector<uint64_t> &counts) {
     segmentation_t seg((PyArrayObject *)pyseg);
     findbasins(seg, counts);
 }
+
+void rg_to_vectors(const region_graph<uint64_t, float> &rg,
+		   std::vector<float> &rg_affs, 
+		   std::vector<uint64_t> &id1, std::vector<uint64_t> &id2) {
+    rg_affs.clear();
+    id1.clear();
+    id2.clear();
+    for (auto e:rg) {
+	rg_affs.push_back(std::get<0>(e));
+	id1.push_back(std::get<1>(e));
+	id2.push_back(std::get<2>(e));
+    }
+}
+
+void rg_from_vectors(region_graph<uint64_t, float> &rg,
+		     const std::vector<float> &rg_affs, 
+		     const std::vector<uint64_t> &id1, 
+		     const std::vector<uint64_t> &id2) {
+    size_t i;
+    rg.clear();
+    for (i=0; i<rg_affs.size(); i++) {
+	rg.emplace_back(rg_affs[i], id1[i], id2[i]);
+    }
+}
+
+void get_region_graph(
+    PyObject *pyaff, PyObject *pyseg, std::size_t max_segid,
+    std::vector<float> &rg_affs, 
+    std::vector<uint64_t> &id1, std::vector<uint64_t> &id2) {
+	
+    affinity_t aff((PyArrayObject *)pyaff);
+    segmentation_t seg((PyArrayObject *)pyseg);
+    auto rg_ptr = get_region_graph(aff, seg, max_segid);
+    rg_to_vectors(*rg_ptr, rg_affs, id1, id2);
+}
+
+void merge_segments_with_function_dw(
+     PyObject *pyseg,
+     std::vector<float> &rg_affs,
+     std::vector<uint64_t> &id1,
+     std::vector<uint64_t> &id2,
+     std::vector<std::size_t> &counts,
+     const size_t size_th,
+     const float weight_th,
+     const size_t lowt,
+     const float merge_th) {
+    segmentation_t seg((PyArrayObject *)pyseg);
+    region_graph<uint64_t, float> rg;
+    
+    rg_from_vectors(rg, rg_affs, id1, id2);
+    auto rg_ptr = merge_segments_with_function_dw(
+	seg, rg, counts, size_th, weight_th, lowt, merge_th);
+    rg_to_vectors(*rg_ptr, rg_affs, id1, id2);
+}
+     

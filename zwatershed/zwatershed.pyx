@@ -18,6 +18,7 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
                   T_merge=0.5,
                   seg_save_path='./', T_aff_relative=True):
     # aff stats
+    # layout: x*y*z*3
     affs = np.asfortranarray(np.transpose(affs, (3, 2, 1, 0)))
     #affs = np.asfortranarray(np.transpose(affs, (1, 2, 3, 0)))
     dims = affs.shape

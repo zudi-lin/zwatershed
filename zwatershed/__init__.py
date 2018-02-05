@@ -1,3 +1,3 @@
 from zwatershed import zw_find_basins,zw_divide_plateaus,zw_steepest_ascent
-from zwatershed import zwshed_initial, zwatershed, zwatershed2
+from zwatershed import zwshed_initial, zwatershed
 from par_funcs import partition_subvols,eval_with_spark,eval_with_par_map,stitch_and_save,merge_by_thresh

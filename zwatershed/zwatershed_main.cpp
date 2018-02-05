@@ -53,7 +53,6 @@ std::map<std::string,std::list<float>> zwshed_initial_c(const size_t dimX, const
         aff->data()[i] = affs[i];
     std::tie(seg_ref , counts_ref) = watershed<uint64_t>(aff, thres_low, thres_high);
 
-
     // calculate region graph
     std::cout << "calculating rgn graph..." << std::endl;
     auto rg = get_region_graph(*aff, *seg_ref , counts_ref.size()-1);
@@ -82,10 +81,10 @@ std::map<std::string,std::list<float>> zwshed_initial_c(const size_t dimX, const
     std::cout << "Returning from zwshed_initial_c_dw" << std::endl;
     return returnMap;
  }
-std::map<std::string,std::vector<double>> merge_no_stats(
+std::map<std::string,std::vector<double>> merge_region(
     size_t dimX, size_t dimY, size_t dimZ, float * rgn_graph, int rgn_graph_len,
     uint64_t * seg_in, uint64_t*counts_in, int counts_len, int thresh, 
-    float T_aff_merge, int T_dust, float T_merge) {
+    float T_aff_merge, int T_dust, float T_merge, int T_mst) {
     std::cout << "evaluating..." << std::endl;
 
     // read data
@@ -102,7 +101,7 @@ std::map<std::string,std::vector<double>> merge_no_stats(
     // merge
     std::cout << "thresh: " << thresh << "\n";
     rg = merge_segments_with_function_dw(
-	  *seg, *rg, counts, thresh, T_aff_merge, T_dust , T_merge);
+	  *seg, *rg, counts, thresh, T_aff_merge, T_dust, T_merge, T_mst);
 
 	// save and return
 	std::map<std::string,std::vector<double>> returnMap;
@@ -231,13 +230,14 @@ void merge_segments_with_function_dw(
      const size_t size_th,
      const float weight_th,
      const size_t lowt,
-     const float merge_th) {
+     const float merge_th,
+     const size_t do_mst) {
     segmentation_t seg((PyArrayObject *)pyseg);
     region_graph<uint64_t, float> rg;
     
     rg_from_vectors(rg, rg_affs, id1, id2);
     auto rg_ptr = merge_segments_with_function_dw(
-	seg, rg, counts, size_th, weight_th, lowt, merge_th);
+	seg, rg, counts, size_th, weight_th, lowt, merge_th, do_mst);
     rg_to_vectors(*rg_ptr, rg_affs, id1, id2);
 }
      

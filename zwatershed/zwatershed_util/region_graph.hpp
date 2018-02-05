@@ -29,23 +29,25 @@ get_region_graph( const AFF_T & aff,
         for ( std::ptrdiff_t y = 0; y < ydim; ++y )
             for ( std::ptrdiff_t x = 0; x < xdim; ++x )
             {
-                if ( (x > 0) && seg[x][y][z] && seg[x-1][y][z] )
-                {
-                    auto mm = std::minmax(seg[x][y][z], seg[x-1][y][z]);
-                    F& curr = edges[mm.first][mm.second];
-                    curr = std::max(curr, aff[x][y][z][0]);
-                }
-                if ( (y > 0) && seg[x][y][z] && seg[x][y-1][z] )
-                {
-                    auto mm = std::minmax(seg[x][y][z], seg[x][y-1][z]);
-                    F& curr = edges[mm.first][mm.second];
-                    curr = std::max(curr, aff[x][y][z][1]);
-                }
-                if ( (z > 0) && seg[x][y][z] && seg[x][y][z-1] )
-                {
-                    auto mm = std::minmax(seg[x][y][z], seg[x][y][z-1]);
-                    F& curr = edges[mm.first][mm.second];
-                    curr = std::max(curr, aff[x][y][z][2]);
+                if (seg[x][y][z]){
+                    if ( (x > 0) && seg[x-1][y][z] && seg[x][y][z]!=seg[x-1][y][z] )
+                    {
+                        auto mm = std::minmax(seg[x][y][z], seg[x-1][y][z]);
+                        F& curr = edges[mm.first][mm.second];
+                        curr = std::max(curr, aff[x][y][z][0]);
+                    }
+                    if ( (y > 0) && seg[x][y-1][z] && seg[x][y][z]!=seg[x][y-1][z] )
+                    {
+                        auto mm = std::minmax(seg[x][y][z], seg[x][y-1][z]);
+                        F& curr = edges[mm.first][mm.second];
+                        curr = std::max(curr, aff[x][y][z][1]);
+                    }
+                    if ( (z > 0) && seg[x][y][z-1] && seg[x][y][z]!=seg[x][y][z-1] )
+                    {
+                        auto mm = std::minmax(seg[x][y][z], seg[x][y][z-1]);
+                        F& curr = edges[mm.first][mm.second];
+                        curr = std::max(curr, aff[x][y][z][2]);
+                    }
                 }
             }
 

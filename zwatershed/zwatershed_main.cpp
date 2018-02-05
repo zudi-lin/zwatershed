@@ -10,10 +10,6 @@
 #include "zwatershed_util/limit_functions.hpp"
 #include "zwatershed_util/types.hpp"
 #include "zwatershed_util/main_helper.hpp"
-// arb funcs
-#include "zwatershed_util/region_graph_arb.hpp"
-#include "zwatershed_util/basic_watershed_arb.hpp"
-#include "zwatershed_util/main_helper_arb.hpp"
 
 
 #include <memory>

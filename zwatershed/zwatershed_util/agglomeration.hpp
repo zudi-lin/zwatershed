@@ -102,7 +102,7 @@ merge_segments_with_function_dw(
         std::cout << "Do MST" << std::endl;
         new_rg_ptr = mst(new_rg_ptr, counts.size());
         std::cout << "New region graph size after mst = " << new_rg_ptr->size() << std::endl;
-        //mergerg(seg, new_rg_ptr, merge_th);
+        mergerg(seg, new_rg_ptr, merge_th);
         std::cout << "New region graph size after mergerg = " << new_rg_ptr->size() << std::endl;
 
         std::cout << "\tDone with updating the region graph, size: "

@@ -40,7 +40,8 @@ template< typename ID, typename F> region_graph_ptr<ID, F>
       ID s2 = sets.find_set(v2);
       if (s1 != s2) {
         F aff=std::get<0>(it);
-        new_rg_ptr->emplace_back(aff, s1, s2);
+        new_rg_ptr->emplace_back(aff, v1, v2);
+        // std::cout<<sets.find_set(std::get<1>(it))<<","<<sets.find_set(std::get<2>(it))<<","<<s1<<","<<s2<<std::endl;
         sets.join(s1, s2);
         adjacency[s1].insert(s2);
         adjacency[s2].insert(s1);
@@ -50,9 +51,9 @@ template< typename ID, typename F> region_graph_ptr<ID, F>
     /*
      * Relabel nodes.
      */
-    std::vector<ID> order(count);
+    std::vector<ID> order(count,0);
     ID curr = 1;
-    for (size_t i=1; i<count; i++) {
+    for (size_t i=0; i<count; i++) {
       if (order[i] == 0) {
         std::deque<ID> bfs;
         bfs.push_back(i);
@@ -71,7 +72,7 @@ template< typename ID, typename F> region_graph_ptr<ID, F>
     }
     std::cout << "Swapping parents and children" << std::endl << std::flush;
     for (auto e:*new_rg_ptr) {
-      if (order[std::get<1>(e)] > order[std::get<2>(e)]) {
+      if (order[std::get<2>(e)] > order[std::get<1>(e)]) {
         std::swap(std::get<1>(e), std::get<2>(e));
       }
     }

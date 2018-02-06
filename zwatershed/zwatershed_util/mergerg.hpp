@@ -38,13 +38,14 @@ template< typename VOLUME_T, typename F> inline void mergerg(
     }
     pd.emplace(c, std::tuple<ID, F>(p, a));
   }
-  std::cout << "Found " << num << " worthy edges." << std::endl << std::flush;
+  std::cout << "aa-Found " << num << " worthy edges." << std::endl << std::flush;
   std::map<ID, ID> rd;
   std::set<ID> rset;
   for (auto e:*rg_ptr) {
     F a = std::get<0>(e);
     ID c0 = std::get<1>(e);
     ID p0 = std::get<2>(e);
+    // std::cout << a << ","<<c0 << "," << p0<<std::endl << std::flush;
     ID p = p0;
     ID c = c0;
     while ((a >= thd) && (pd.count(p) > 0)) {

@@ -47,6 +47,7 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
         counts_len = len(counts_out)
         seg_in = np.array(map['seg'], dtype='uint64')
         rgn_graph = graph.reshape(len(graph) / 3, 3)
+
         if seg_save_path is None:
             segs[i] = seg.copy()
         else:

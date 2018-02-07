@@ -70,33 +70,10 @@ template< typename ID, typename F> region_graph_ptr<ID, F>
         }
       }
     }
-    std::cout << "Swapping parents and children" << std::endl << std::flush;
-    int cc=0;
-    for (auto e:*new_rg_ptr) {
-        cc++;
-        if (cc>630){
-        std::cout << "before-mst " << std::get<1>(e)<<","<<std::get<2>(e)<<std::endl << std::flush;
-        }
-    }
-    cc=0;
-    for (auto e:*new_rg_ptr) {
-        cc++;
+    for (typename region_graph<ID, F>::value_type &e:*new_rg_ptr) {
       if (order[std::get<2>(e)] > order[std::get<1>(e)]) {
-        if (cc>630){
-            std::cout << "swap-before " << std::get<1>(e)<<","<<std::get<2>(e)<<std::endl << std::flush;
-        }
         std::swap(std::get<1>(e), std::get<2>(e));
-        if (cc>630){
-            std::cout << "swap-after " << std::get<1>(e)<<","<<std::get<2>(e)<<std::endl << std::flush;
-        }
       }
-    }
-     cc=0;
-    for (auto e:*new_rg_ptr) {
-        cc++;
-        if (cc>630){
-        std::cout << "mid-mst " << std::get<1>(e)<<","<<std::get<2>(e)<<std::endl << std::flush;
-        }
     }
     return new_rg_ptr;
 }

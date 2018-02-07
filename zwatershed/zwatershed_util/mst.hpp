@@ -43,8 +43,8 @@ template< typename ID, typename F> region_graph_ptr<ID, F>
         new_rg_ptr->emplace_back(aff, v1, v2);
         // std::cout<<sets.find_set(std::get<1>(it))<<","<<sets.find_set(std::get<2>(it))<<","<<s1<<","<<s2<<std::endl;
         sets.join(s1, s2);
-        adjacency[s1].insert(s2);
-        adjacency[s2].insert(s1);
+        adjacency[v1].insert(v2); // for re-order
+        adjacency[v2].insert(v1);
       }
     }
     std::cout << "Relabeling nodes" << std::endl << std::flush;
@@ -53,7 +53,7 @@ template< typename ID, typename F> region_graph_ptr<ID, F>
      */
     std::vector<ID> order(count,0);
     ID curr = 1;
-    for (size_t i=0; i<count; i++) {
+    for (size_t i=1; i<count; i++) {
       if (order[i] == 0) {
         std::deque<ID> bfs;
         bfs.push_back(i);
@@ -71,10 +71,32 @@ template< typename ID, typename F> region_graph_ptr<ID, F>
       }
     }
     std::cout << "Swapping parents and children" << std::endl << std::flush;
+    int cc=0;
     for (auto e:*new_rg_ptr) {
+        cc++;
+        if (cc>630){
+        std::cout << "before-mst " << std::get<1>(e)<<","<<std::get<2>(e)<<std::endl << std::flush;
+        }
+    }
+    cc=0;
+    for (auto e:*new_rg_ptr) {
+        cc++;
       if (order[std::get<2>(e)] > order[std::get<1>(e)]) {
+        if (cc>630){
+            std::cout << "swap-before " << std::get<1>(e)<<","<<std::get<2>(e)<<std::endl << std::flush;
+        }
         std::swap(std::get<1>(e), std::get<2>(e));
+        if (cc>630){
+            std::cout << "swap-after " << std::get<1>(e)<<","<<std::get<2>(e)<<std::endl << std::flush;
+        }
       }
+    }
+     cc=0;
+    for (auto e:*new_rg_ptr) {
+        cc++;
+        if (cc>630){
+        std::cout << "mid-mst " << std::get<1>(e)<<","<<std::get<2>(e)<<std::endl << std::flush;
+        }
     }
     return new_rg_ptr;
 }

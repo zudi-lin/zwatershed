@@ -30,9 +30,9 @@ template< typename VOLUME_T, typename F> inline void mergerg(
   std::cout << "Mergerg()" << std::endl << std::flush;
   size_t num = 0;
   for (auto e:*rg_ptr) {
+    F a = std::get<0>(e);
     ID c = std::get<1>(e);
     ID p = std::get<2>(e);
-    F a = std::get<0>(e);
     if (a > thd) {
       ++num;
     }

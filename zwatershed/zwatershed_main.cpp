@@ -118,7 +118,7 @@ std::map<std::string,std::vector<double>> merge_region(
     for (const auto& x:counts)
         counts_data.push_back(x);
     returnMap["seg"] = seg_vector;
-    returnMap["rg"]=rg_data;
+    returnMap["rg"] = rg_data;
     returnMap["counts"] = counts_data;
     return returnMap;
  }

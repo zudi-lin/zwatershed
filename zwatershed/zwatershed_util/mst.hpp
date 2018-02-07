@@ -41,7 +41,6 @@ template< typename ID, typename F> region_graph_ptr<ID, F>
       if (s1 != s2) {
         F aff=std::get<0>(it);
         new_rg_ptr->emplace_back(aff, v1, v2);
-        // std::cout<<sets.find_set(std::get<1>(it))<<","<<sets.find_set(std::get<2>(it))<<","<<s1<<","<<s2<<std::endl;
         sets.join(s1, s2);
         adjacency[v1].insert(v2); // for re-order
         adjacency[v2].insert(v1);

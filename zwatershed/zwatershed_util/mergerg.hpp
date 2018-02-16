@@ -50,7 +50,7 @@ template< typename VOLUME_T, typename F> inline void mergerg(
     ID c = c0;
     while (pd.count(p) > 0) {
       a = std::get<1>(pd[p]);
-      if (a >= thd) break;
+      if (a < thd) break;
       p = std::get<0>(pd[p]);
     }
     if (p != p0) {

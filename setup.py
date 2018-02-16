@@ -26,11 +26,9 @@ class build_ext(_build_ext):
         __builtins__.__NUMPY_SETUP__ = False
 
 setup(name='zwatershed',
-      version='0.11',
-      description='Fast watersheds',
-      url='https://github.com/TuragaLab/zwatershed',
-      author='Chandan Singh',
-      author_email='csinva@virginia.edu',
+      version='0.2',
+      description='zwatersheds',
+      url='https://github.com/donglaiw/zwatershed',
 	  cmdclass=dict(
             build_ext=build_ext
     	),
@@ -43,7 +41,6 @@ setup(name='zwatershed',
                          include_dirs=include_dirs,
                          library_dirs=library_dirs,
                          language='c++',
-                         # std= 'c++11',
                          extra_link_args=["-std=c++11"],
                          extra_compile_args=["-std=c++11", "-w"])],
       zip_safe=False)

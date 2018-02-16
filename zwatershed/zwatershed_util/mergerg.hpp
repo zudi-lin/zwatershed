@@ -43,6 +43,7 @@ template< typename VOLUME_T, typename F> inline void mergerg(
   std::set<ID> rset;
   for (auto e:*rg_ptr) {
     F a = std::get<0>(e);
+    if (a < thd) continue;
     ID c0 = std::get<1>(e);
     ID p0 = std::get<2>(e);
     // std::cout << a << ","<<c0 << "," << p0<<std::endl << std::flush;
@@ -53,10 +54,8 @@ template< typename VOLUME_T, typename F> inline void mergerg(
       if (a < thd) break;
       p = std::get<0>(pd[p]);
     }
-    if (p != p0) {
-      rd[c0] = p;
-      rset.insert(p);
-    }
+    rd[c0] = p;
+    rset.insert(p);
   }
   std::cout << "Found " << rset.size() << " parents" << std::endl 
             << "Merged " << rd.size() << " children" << std::endl

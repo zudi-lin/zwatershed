@@ -24,7 +24,7 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
 
     print "2. get initial seg"
     seg_empty = np.empty((dims[0], dims[1], dims[2]), dtype='uint64')
-    map = zwshed_initial(seg_empty, affs, affs_thres[0], affs_thres[1])
+    map = zw_initial(seg_empty, affs, affs_thres[0], affs_thres[1])
 
     # get initial rg
     cdef np.ndarray[uint64_t, ndim=1] seg_in = map['seg']
@@ -62,10 +62,10 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
 #################################################
 # auxilary function for debug purpose
 
-def zwshed_initial(np.ndarray[np.float32_t, ndim=4] affs, affs_low, affs_high):
+def zw_initial(np.ndarray[np.float32_t, ndim=4] affs, affs_low, affs_high):
     cdef np.ndarray[uint64_t, ndim=1] counts = np.empty(1, dtype='uint64')
     dims = affs.shape
-    map = zwshed_initial_c(dims[0], dims[1], dims[2], &affs[0, 0, 0, 0], float(affs_low), float(affs_high))
+    map = zw_initial_cpp(dims[0], dims[1], dims[2], &affs[0, 0, 0, 0], float(affs_low), float(affs_high))
     graph = np.array(map['rg'], dtype='float32')
     return {'rg': graph.reshape(len(graph) / 3, 3), 'seg': np.array(map['seg'], dtype='uint64'),
             'counts': np.array(map['counts'], dtype='uint64')}
@@ -228,7 +228,7 @@ def zw_merge_segments_with_function(np.ndarray[np.uint64_t, ndim=3] seg,
     
 #-------------- c++ methods --------------------------------------------------------------
 cdef extern from "zwatershed.h":
-    map[string, list[float]] zwshed_initial_c(size_t dimX, size_t dimY, size_t dimZ, np.float32_t*affs,
+    map[string, list[float]] zw_initial_cpp(size_t dimX, size_t dimY, size_t dimZ, np.float32_t*affs,
                                                 np.float32_t thres_low, np.float32_t thres_high)
 
     map[string, vector[double]] merge_region(size_t dx, size_t dy, size_t dz,

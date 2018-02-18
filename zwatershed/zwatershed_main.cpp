@@ -38,7 +38,7 @@ double LOW=  0.0001;
 double HIGH= 0.9999;
 bool RECREATE_RG = true;
 
-std::map<std::string,std::list<float>> zwshed_initial_c(const size_t dimX, const size_t dimY, const size_t dimZ, float* affs,
+std::map<std::string,std::list<float>> zw_initial_cpp(const size_t dimX, const size_t dimY, const size_t dimZ, float* affs,
                                                            float thres_low, float thres_high)
 {
     std::cout << "calculating basic watershed..." << std::endl;
@@ -78,7 +78,7 @@ std::map<std::string,std::list<float>> zwshed_initial_c(const size_t dimX, const
     for (const auto& x:counts_ref)
         counts_data.push_back(x);
     std::cout << "copied counts" << std::endl;
-    std::cout << "Returning from zwshed_initial_c" << std::endl;
+    std::cout << "Returning from zw_initial_cpp" << std::endl;
     return returnMap;
  }
 std::map<std::string,std::vector<double>> merge_region(

@@ -11,7 +11,7 @@
 #include <Python.h>
 #include "numpy/arrayobject.h"
 
-std::map<std::string,std::list<float>> zwshed_initial_c(const size_t dx, const size_t dy, const size_t dz, float* affs,
+std::map<std::string,std::list<float>> zw_initial_cpp(const size_t dx, const size_t dy, const size_t dz, float* affs,
                                                 float thres_low, float thres_high);
 std::map<std::string,std::vector<double>> merge_region(size_t dimX, size_t dimY, size_t dimZ, float * rgn_graph,
                                         int rgn_graph_len, uint64_t * seg_in, uint64_t*counts, int counts_len, 

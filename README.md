@@ -1,4 +1,4 @@
-# Cython Wrapper for Zwatershed
+# Cython version of Zwatershed
 
 ## Resource
 - paper: http://arxiv.org/abs/1505.00249

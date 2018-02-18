@@ -5,3 +5,4 @@ dist
 build
 *checkpoints*
 *.nfs
+*.sw*

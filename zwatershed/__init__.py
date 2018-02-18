@@ -1,4 +1,4 @@
 from zwatershed import zw_find_basins,zw_divide_plateaus,zw_steepest_ascent
 from zwatershed import zw_get_region_graph, zw_get_region_graph_average
-from zwatershed import zw_merge_segments_with_function_dw
+from zwatershed import zw_merge_segments_with_function
 from zwatershed import zw_initial, zwatershed

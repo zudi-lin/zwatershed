@@ -28,7 +28,7 @@ void get_region_graph_average(
     PyObject *aff, PyObject *seg, size_t max_segid,
     std::vector<float> &rg_affs, 
     std::vector<uint64_t> &id1, std::vector<uint64_t> &id2);
-void merge_segments_with_function_dw(
+void merge_segments_with_function(
      PyObject *pyseg,
      std::vector<float> &rg_affs,
      std::vector<uint64_t> &id1,

@@ -62,7 +62,7 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
 #################################################
 # auxilary function for debug purpose
 
-def zwshed_initial(np.ndarray[uint64_t, ndim=3] seg, np.ndarray[np.float32_t, ndim=4] affs, affs_low, affs_high):
+def zwshed_initial(np.ndarray[np.float32_t, ndim=4] affs, affs_low, affs_high):
     cdef np.ndarray[uint64_t, ndim=1] counts = np.empty(1, dtype='uint64')
     dims = affs.shape
     map = zwshed_initial_c(dims[0], dims[1], dims[2], &affs[0, 0, 0, 0], float(affs_low), float(affs_high))
@@ -100,15 +100,13 @@ def zw_find_basins(np.ndarray[np.uint64_t, ndim=3] seg):
     return pycounts
 
 def zw_get_region_graph(np.ndarray[np.float32_t, ndim=4] aff,
-                        np.ndarray[np.uint64_t, ndim=3] seg,
-                        max_segid):
+                        np.ndarray[np.uint64_t, ndim=3] seg):
     '''Return the initial region graph using max edge affinity.
     
     :param aff: the affinity predictions - an array of x, y, z, c where c == 0
                 is the affinity prediction for x, c == 1 is the affinity
                 prediction for y and c == 2 is the affinity prediction for z
     :param seg: the segmentation after finding basins
-    :param max_segid: the maximum ID in seg
     :returns: a region graph as a 3-tuple of numpy 1-d arrays of affinity, 
               ID1 and ID2
     '''
@@ -122,7 +120,7 @@ def zw_get_region_graph(np.ndarray[np.float32_t, ndim=4] aff,
         np.ndarray[np.uint64_t, ndim=1] np_id1
         np.ndarray[np.uint64_t, ndim=1] np_id2
         size_t i
-    
+    max_segid = seg.max()
     get_region_graph(paff, pseg, max_segid, rg_affs, id1, id2)
     np_rg_affs = np.zeros(rg_affs.size(), np.float32)
     np_id1 = np.zeros(id1.size(), np.uint64)
@@ -134,15 +132,13 @@ def zw_get_region_graph(np.ndarray[np.float32_t, ndim=4] aff,
     return (np_rg_affs, np_id1, np_id2)
 
 def zw_get_region_graph_average(np.ndarray[np.float32_t, ndim=4] aff,
-                                np.ndarray[np.uint64_t, ndim=3] seg,
-                                max_segid):
+                                np.ndarray[np.uint64_t, ndim=3] seg):
     '''Return the initial region graph using average edge affinity
     
     :param aff: the affinity predictions - an array of x, y, z, c where c == 0
                 is the affinity prediction for x, c == 1 is the affinity
                 prediction for y and c == 2 is the affinity prediction for z
     :param seg: the segmentation after finding basins
-    :param max_segid: the maximum ID in seg
     :returns: a region graph as a 3-tuple of numpy 1-d arrays of affinity, 
               ID1 and ID2
     '''
@@ -157,6 +153,7 @@ def zw_get_region_graph_average(np.ndarray[np.float32_t, ndim=4] aff,
         np.ndarray[np.uint64_t, ndim=1] np_id2
         size_t i
     
+    max_segid = seg.max()
     get_region_graph_average(paff, pseg, max_segid, rg_affs, id1, id2)
     np_rg_affs = np.zeros(rg_affs.size(), np.float32)
     np_id1 = np.zeros(id1.size(), np.uint64)
@@ -167,7 +164,7 @@ def zw_get_region_graph_average(np.ndarray[np.float32_t, ndim=4] aff,
         np_id2[i] = id2[i]
     return (np_rg_affs, np_id1, np_id2)
 
-def zw_merge_segments_with_function_dw(np.ndarray[np.uint64_t, ndim=3] seg,
+def zw_merge_segments_with_function(np.ndarray[np.uint64_t, ndim=3] seg,
                                        np.ndarray[np.float32_t, ndim=1] rg_affs,
                                        np.ndarray[np.uint64_t, ndim=1] id1,
                                        np.ndarray[np.uint64_t, ndim=1] id2,
@@ -213,7 +210,7 @@ def zw_merge_segments_with_function_dw(np.ndarray[np.uint64_t, ndim=3] seg,
     for 0 <= i < counts.shape[0]:
         vcounts.push_back(counts[i])
 
-    merge_segments_with_function_dw(pseg, vrg_affs, vid1, vid2, vcounts,
+    merge_segments_with_function(pseg, vrg_affs, vid1, vid2, vcounts,
         T_size, T_weight, T_dust, T_merge, T_mst);
 
     out_rg_affs = np.zeros(vrg_affs.size(), np.float32)
@@ -246,9 +243,7 @@ cdef extern from "zwatershed.h":
     void get_region_graph_average(
         PyObject *aff, PyObject *seg, size_t max_segid, vector[float] &rg_affs,
         vector[uint64_t] &id1, vector[uint64_t] &id2)
-    void merge_segments_with_function_dw(
+    void merge_segments_with_function(
         PyObject *pyseg, vector[float] &rg_affs, vector[uint64_t] &id1,
         vector[uint64_t] &id2, vector[size_t] &counts, size_t size_th,
         float weight_th, size_t lowt, float merge_th, int do_mst)
-
-

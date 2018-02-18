@@ -78,7 +78,7 @@ std::map<std::string,std::list<float>> zwshed_initial_c(const size_t dimX, const
     for (const auto& x:counts_ref)
         counts_data.push_back(x);
     std::cout << "copied counts" << std::endl;
-    std::cout << "Returning from zwshed_initial_c_dw" << std::endl;
+    std::cout << "Returning from zwshed_initial_c" << std::endl;
     return returnMap;
  }
 std::map<std::string,std::vector<double>> merge_region(
@@ -100,7 +100,7 @@ std::map<std::string,std::vector<double>> merge_region(
 
     // merge
     std::cout << "thresh: " << thresh << "\n";
-    rg = merge_segments_with_function_dw(
+    rg = merge_segments_with_function(
 	  *seg, *rg, counts, thresh, T_aff_merge, T_dust, T_merge, T_mst);
 
 	// save and return
@@ -221,7 +221,7 @@ void get_region_graph_average(
     rg_to_vectors(*rg_ptr, rg_affs, id1, id2);
 }
 
-void merge_segments_with_function_dw(
+void merge_segments_with_function(
      PyObject *pyseg,
      std::vector<float> &rg_affs,
      std::vector<uint64_t> &id1,
@@ -236,7 +236,7 @@ void merge_segments_with_function_dw(
     region_graph<uint64_t, float> rg;
     
     rg_from_vectors(rg, rg_affs, id1, id2);
-    auto rg_ptr = merge_segments_with_function_dw(
+    auto rg_ptr = merge_segments_with_function(
 	seg, rg, counts, size_th, weight_th, lowt, merge_th, do_mst);
     rg_to_vectors(*rg_ptr, rg_affs, id1, id2);
 }

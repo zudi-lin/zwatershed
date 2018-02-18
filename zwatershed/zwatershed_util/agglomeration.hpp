@@ -9,7 +9,7 @@
 #include <set>
 template< typename VOLUME_T, typename F, typename M >
 inline region_graph_ptr<typename VOLUME_T::element, F> 
-merge_segments_with_function_dw( 
+merge_segments_with_function( 
     VOLUME_T &seg,
     const region_graph<typename VOLUME_T::element,F> &rg,
     std::vector<std::size_t>& counts,

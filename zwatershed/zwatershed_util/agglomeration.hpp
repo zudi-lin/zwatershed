@@ -16,8 +16,7 @@ merge_segments_with_function(
     const M& size_th,
     const F& weight_th,
     const M& lowt,
-    const F& merge_th,
-    const M do_mst)
+    const F& merge_th)
 {
     using ID=typename VOLUME_T::element;
     zi::disjoint_sets<ID> sets(counts.size());
@@ -101,7 +100,7 @@ merge_segments_with_function(
             }
         }
     }
-    if (do_mst>0){
+    if (merge_th>0){
         std::cout << "Do MST" << std::endl;
         new_rg_ptr = mst(new_rg_ptr, counts.size());
         std::cout << "New region graph size after mst = " << new_rg_ptr->size() << std::endl;

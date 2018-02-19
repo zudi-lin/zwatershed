@@ -14,7 +14,7 @@ from cython.operator cimport dereference as deref, preincrement as inc
 #-------------- interface methods --------------------------------------------------------------
 def zwatershed(np.ndarray[np.float32_t, ndim=4] affs, 
                   T_threshes, T_aff=[0.01,0.8,0.2], T_aff_relative=True, 
-                  T_dust=600, T_merge=0.5, T_mst=0,
+                  T_dust=600, T_merge=0.5,
                   seg_save_path=None):
     # aff stats
     affs = np.asfortranarray(np.transpose(affs, (1, 2, 3, 0)))
@@ -38,7 +38,7 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
             map = merge_region(
                 dims[0], dims[1], dims[2], &rgn_graph[0, 0],
                 rgn_graph.shape[0], &seg_in[0], &counts_out[0], 
-                len(counts_out), T_threshes[i], affs_thres[2], T_dust, T_merge, T_mst)
+                len(counts_out), T_threshes[i], affs_thres[2], T_dust, T_merge)
         counts_out = np.array(map['counts'], dtype='uint64')
         seg_in = np.array(map['seg'], dtype='uint64')
         rgn_graph = np.array(map['rg'], dtype='float32').reshape(-1, 3)
@@ -75,7 +75,7 @@ def zw_initial(np.ndarray[np.float32_t, ndim=4] affs, affs_low, affs_high):
 
 def zw_merge_region(np.ndarray[uint64_t, ndim=3] seg_init, np.ndarray[uint64_t, ndim=1] counts, 
                    np.ndarray[np.float32_t, ndim=2] rg, T_threshes, T_aff_merge=0.2, 
-                    T_dust=600, T_merge=0.5, T_mst=0, seg_save_path=None):
+                    T_dust=600, T_merge=0.5, seg_save_path=None):
     # get initial rg
     # input seg: z*y*x
     # internal seg: x*y*z
@@ -94,7 +94,7 @@ def zw_merge_region(np.ndarray[uint64_t, ndim=3] seg_init, np.ndarray[uint64_t, 
             map = merge_region(
                 dims[0], dims[1], dims[2], &rgn_graph[0, 0],
                 rgn_graph.shape[0], &seg_in[0], &counts_out[0], 
-                counts_len, T_threshes[i], T_aff_merge, T_dust, T_merge, T_mst)
+                counts_len, T_threshes[i], T_aff_merge, T_dust, T_merge)
             # for next iteration
             seg_in = np.array(map['seg'], dtype='uint64')
             counts_out = np.array(map['counts'], dtype='uint64')
@@ -214,7 +214,7 @@ def zw_merge_segments_with_function(np.ndarray[np.uint64_t, ndim=3] seg,
                                        np.ndarray[np.uint64_t, ndim=1] id1,
                                        np.ndarray[np.uint64_t, ndim=1] id2,
                                        np.ndarray[np.uint64_t, ndim=1] counts,
-                                       T_size, T_weight, T_dust, T_merge, T_mst):
+                                       T_size, T_weight, T_dust, T_merge):
     '''Perform the agglomeration step
     
     :param seg: the segmentation
@@ -229,7 +229,6 @@ def zw_merge_segments_with_function(np.ndarray[np.uint64_t, ndim=3] seg,
     :param T_dust: discard objects smaller than this if not merged
     :param T_merge: in the second step, merge if affinities between pairs are
                     greater or equal to this.
-    :param T_mst: if do MST
     :returns: a two tuple of counts and final region graph. "counts" is a
     one-dimensional numpy array of count per ID. "region graph" is a three
     tuple of numpy arrays: affinity, id1 and id2.
@@ -256,7 +255,7 @@ def zw_merge_segments_with_function(np.ndarray[np.uint64_t, ndim=3] seg,
         vcounts.push_back(counts[i])
 
     merge_segments_with_function(pseg, vrg_affs, vid1, vid2, vcounts,
-        T_size, T_weight, T_dust, T_merge, T_mst);
+        T_size, T_weight, T_dust, T_merge);
 
     out_rg_affs = np.zeros(vrg_affs.size(), np.float32)
     out_id1 = np.zeros(vid1.size(), np.uint64)
@@ -278,7 +277,7 @@ cdef extern from "zwatershed.h":
 
     map[string, vector[double]] merge_region(size_t dx, size_t dy, size_t dz,
                                                np.float32_t*rgn_graph, int rgn_graph_len, uint64_t*seg,
-                                               uint64_t*counts, int counts_len, int thresh, float weight_th, int dust_size, float merge_th, int do_mst)
+                                               uint64_t*counts, int counts_len, int thresh, float weight_th, int dust_size, float merge_th)
     void steepest_ascent(PyObject *aff, PyObject *seg, float low, float high)
     void divide_plateaus(PyObject *seg)
     void find_basins(PyObject *seg, vector[uint64_t] &counts)
@@ -291,4 +290,4 @@ cdef extern from "zwatershed.h":
     void merge_segments_with_function(
         PyObject *pyseg, vector[float] &rg_affs, vector[uint64_t] &id1,
         vector[uint64_t] &id2, vector[size_t] &counts, size_t size_th,
-        float weight_th, size_t lowt, float merge_th, int do_mst)
+        float weight_th, size_t lowt, float merge_th)

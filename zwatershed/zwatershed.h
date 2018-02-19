@@ -15,7 +15,7 @@ std::map<std::string,std::list<float>> zw_initial_cpp(const size_t dx, const siz
                                                 float thres_low, float thres_high);
 std::map<std::string,std::vector<double>> merge_region(size_t dimX, size_t dimY, size_t dimZ, float * rgn_graph,
                                         int rgn_graph_len, uint64_t * seg_in, uint64_t*counts, int counts_len, 
-                                        int thresh, float T_aff_merge, int T_dust, float T_merge, int T_mst);
+                                        int thresh, float T_aff_merge, int T_dust, float T_merge);
 
 void steepest_ascent(PyObject *aff, PyObject *seg, float low, float high);
 void divide_plateaus(PyObject *seg);
@@ -37,6 +37,5 @@ void merge_segments_with_function(
      const size_t size_th,
      const float weight_th,
      const size_t lowt,
-     const float merge_th,
-     const size_t do_mst);
+     const float merge_th);
 #endif

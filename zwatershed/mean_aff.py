@@ -12,6 +12,7 @@ SIX_CONNECTED = np.array([[[False, False, False],
                           [[False, False, False],
                            [False, True, False],
                            [False, False, False]]])
+
 def mean_agglomeration(seg, aff, thd):
     rg_ma = ma_get_region_graph(seg, aff)
     new_seg = ma_merge_region(seg, rg_ma, thd)
@@ -48,8 +49,23 @@ def ma_get_region_graph(seg, aff):
 def ma_merge_region(seg, rg_ma, thd):
     id1 = rg_ma[:,0].astype(seg.dtype)
     id2 = rg_ma[:,1].astype(seg.dtype)
+
     tomerge = np.where(rg_ma[:,2]>=float(thd))[0]
     print "#to merge ", len(tomerge)
-    for row in tomerge:
+
+    seg_new = merge_label(seg, id1[tomerge], id2[tomerge])
+    return seg_new
+
+def merge_label(seg, id1, id2):
+    # relabel id2 into id1 
+    labels = np.unique(seg)
+    m = int(labels.max())                                                                
+    label_map = np.zeros(m+1, int)                                                     
+    label_map[labels] = labels
+    label_map[id2] = id1
+    """
+    for row in range(len(id1)):
         seg[seg==id2[row]] = id1[row]
-    return seg
+    """
+    return label_map[seg]
+ 

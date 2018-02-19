@@ -84,7 +84,7 @@ std::map<std::string,std::list<float>> zw_initial_cpp(const size_t dimX, const s
 std::map<std::string,std::vector<double>> merge_region(
     size_t dimX, size_t dimY, size_t dimZ, float * rgn_graph, int rgn_graph_len,
     uint64_t * seg_in, uint64_t*counts_in, int counts_len, int thresh, 
-    float T_aff_merge, int T_dust, float T_merge, int T_mst) {
+    float T_aff_merge, int T_dust, float T_merge) {
     std::cout << "evaluating..." << std::endl;
 
     // read data
@@ -101,7 +101,7 @@ std::map<std::string,std::vector<double>> merge_region(
     // merge
     std::cout << "thresh: " << thresh << "\n";
     rg = merge_segments_with_function(
-	  *seg, *rg, counts, thresh, T_aff_merge, T_dust, T_merge, T_mst);
+	  *seg, *rg, counts, thresh, T_aff_merge, T_dust, T_merge);
 
 	// save and return
 	std::map<std::string,std::vector<double>> returnMap;
@@ -230,14 +230,13 @@ void merge_segments_with_function(
      const size_t size_th,
      const float weight_th,
      const size_t lowt,
-     const float merge_th,
-     const size_t do_mst) {
+     const float merge_th) {
     segmentation_t seg((PyArrayObject *)pyseg);
     region_graph<uint64_t, float> rg;
     
     rg_from_vectors(rg, rg_affs, id1, id2);
     auto rg_ptr = merge_segments_with_function(
-	seg, rg, counts, size_th, weight_th, lowt, merge_th, do_mst);
+	seg, rg, counts, size_th, weight_th, lowt, merge_th);
     rg_to_vectors(*rg_ptr, rg_affs, id1, id2);
 }
      

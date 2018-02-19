@@ -3,6 +3,7 @@ from scipy.sparse import coo_matrix
 from scipy.ndimage import grey_erosion, grey_dilation
 import os,sys
 import h5py
+import zwatershed
 
 def readh5(filename, datasetname='main'):
     fid=h5py.File(filename)
@@ -36,7 +37,6 @@ if __name__ == "__main__":
     output_txt = sys.argv[1]
     thd = sys.argv[2]
     output_h5 = output_txt[:-4]+'_'+thd+'.h5'
-
     if os.path.exists(output_h5):
         print "done already: ",output_h5
     else:
@@ -45,40 +45,13 @@ if __name__ == "__main__":
             print "compute mean affinity"
             watershed = readh5(sys.argv[3], sys.argv[4])
             affinity = readh5(sys.argv[5], sys.argv[6]).astype(np.float32)
-            mpred = affinity.mean(axis=0)
-            # find boundary # find boundary # find boundary # find boundary # find boundary # find boundary # find boundary # find boundary # find boundary # find boundary # find boundary
-            ws_eroded = grey_erosion(watershed, footprint=SIX_CONNECTED)
-            ws_dilated = grey_dilation(watershed, footprint=SIX_CONNECTED)
-            different = (ws_eroded != 0) & (ws_eroded != ws_dilated)
-            id1 = ws_eroded[different]
-            id2 = ws_dilated[different]
-            id1id2pred = mpred[different]
-            m = coo_matrix((id1id2pred, (id1, id2)))
-            m.sum_duplicates()
-            ma = coo_matrix((np.ones(len(id1)), (id1, id2)))
-            ma.sum_duplicates()
-            id1a, id2a = m.nonzero()
-            mm = m.tocsr()
-            mma = ma.tocsr()
-            scores = mm[id1a, id2a] / mma[id1a, id2a]
-            scores = scores.A1
-            order = np.argsort(np.max(scores) - scores)
-            scores = scores[order]
-            # already sorted: id1a < id2a
-            id1a = id1a[order]
-            id2a = id2a[order]
-            out = np.vstack((id1a,id2a,scores)).transpose(1,0)
+            ma_rg = zwatershed.ma_get_region_graph(watershed, affinity)
             print "saving ", output_txt
-            np.savetxt(output_txt, out, fmt='%.2f', delimiter=",")
+            np.savetxt(output_txt, ma_rg, fmt='%.2f', delimiter=",")
         else:
             print "loading ", output_txt
-            out = np.loadtxt(output_txt, delimiter=",")
+            ma_rg = np.loadtxt(output_txt, delimiter=",")
         if watershed is None:
             watershed = readh5(sys.argv[3], sys.argv[4])
-        outT = watershed.dtype
-        tomerge = np.where(out[:,2]>=float(thd))[0]
-        print "#to merge ", len(tomerge)
-        for row in tomerge:
-            watershed[watershed==out[row,1].astype(outT)] = out[row,0].astype(outT)
-        print "saving ", output_h5
-        writeh5(output_h5,'stack',watershed)
+        new_seg = zwatershed.ma_merge_region(watershed, ma_rg, thd)
+        writeh5(output_h5,'stack', new_seg)

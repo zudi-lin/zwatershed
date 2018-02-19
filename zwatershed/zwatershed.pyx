@@ -23,13 +23,11 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
     print "1. affinity threshold: ", affs_thres
 
     print "2. get initial seg"
-    seg_empty = np.empty((dims[0], dims[1], dims[2]), dtype='uint64')
-    map = zw_initial(seg_empty, affs, affs_thres[0], affs_thres[1])
+    map = zw_initial_cpp(dims[0], dims[1], dims[2], &affs[0, 0, 0, 0], affs_thres[0], affs_thres[1])
 
-    # get initial rg
-    cdef np.ndarray[uint64_t, ndim=1] seg_in = map['seg']
-    cdef np.ndarray[uint64_t, ndim=1] counts_out = map['counts']
-    cdef np.ndarray[np.float32_t, ndim=2] rgn_graph = map['rg']
+    cdef np.ndarray[uint64_t, ndim=1] seg_in = np.array(map['seg'],dtype='uint64')
+    cdef np.ndarray[uint64_t, ndim=1] counts_out = np.array(map['counts'],dtype='uint64')
+    cdef np.ndarray[np.float32_t, ndim=2] rgn_graph = np.array(map['rg'], dtype='float32').reshape(-1, 3)
 
     # get segs, stats
     T_threshes.sort()
@@ -40,14 +38,12 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
             map = merge_region(
                 dims[0], dims[1], dims[2], &rgn_graph[0, 0],
                 rgn_graph.shape[0], &seg_in[0], &counts_out[0], 
-                len(map['counts']), T_threshes[i], affs_thres[2], T_dust, T_merge, T_mst)
-        seg = np.array(map['seg'], dtype='uint64').reshape((dims[2], dims[1], dims[0])).transpose(2, 1, 0)
-        graph = np.array(map['rg'], dtype='float32')
+                len(counts_out), T_threshes[i], affs_thres[2], T_dust, T_merge, T_mst)
         counts_out = np.array(map['counts'], dtype='uint64')
-        counts_len = len(counts_out)
         seg_in = np.array(map['seg'], dtype='uint64')
-        rgn_graph = graph.reshape(len(graph) / 3, 3)
+        rgn_graph = np.array(map['rg'], dtype='float32').reshape(-1, 3)
 
+        seg = seg_in.reshape((dims[2], dims[1], dims[0])).transpose(2, 1, 0)
         if seg_save_path is None:
             segs[i] = seg.copy()
         else:
@@ -64,12 +60,61 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
 
 def zw_initial(np.ndarray[np.float32_t, ndim=4] affs, affs_low, affs_high):
     cdef np.ndarray[uint64_t, ndim=1] counts = np.empty(1, dtype='uint64')
+    # affs: z*y*x*3
+    affs = np.asfortranarray(np.transpose(affs, (1, 2, 3, 0)))
     dims = affs.shape
     map = zw_initial_cpp(dims[0], dims[1], dims[2], &affs[0, 0, 0, 0], float(affs_low), float(affs_high))
+
     graph = np.array(map['rg'], dtype='float32')
-    return {'rg': graph.reshape(len(graph) / 3, 3), 'seg': np.array(map['seg'], dtype='uint64'),
+    rgn_graph = graph.reshape(len(graph) / 3, 3)
+    # for output: seg.shape=[z*y*x]
+    seg = np.array(map['seg'], dtype='uint64').reshape((dims[2], dims[1], dims[0])).transpose(2,1,0)
+
+    return {'rg': rgn_graph, 'seg': seg,
             'counts': np.array(map['counts'], dtype='uint64')}
 
+def zw_merge_region(np.ndarray[uint64_t, ndim=3] seg_init, np.ndarray[uint64_t, ndim=1] counts, 
+                   np.ndarray[np.float32_t, ndim=2] rg, T_threshes, T_aff_merge=0.2, 
+                    T_dust=600, T_merge=0.5, T_mst=0, seg_save_path=None):
+    # get initial rg
+    # input seg: z*y*x
+    # internal seg: x*y*z
+    dims = seg_init.shape
+    cdef np.ndarray[uint64_t, ndim=1] seg_in = seg_init.transpose(2,1,0).reshape(-1)
+    cdef np.ndarray[uint64_t, ndim=1] counts_out = counts
+    cdef np.ndarray[np.float32_t, ndim=2] rgn_graph = rg
+
+    # get segs, stats
+    T_threshes.sort()
+    segs = [None]*len(T_threshes)
+    counts_len = len(counts)
+    for i in range(len(T_threshes)):
+        print "3. do thres: ", T_threshes[i], T_dust
+        if(len(rgn_graph) > 0):
+            map = merge_region(
+                dims[0], dims[1], dims[2], &rgn_graph[0, 0],
+                rgn_graph.shape[0], &seg_in[0], &counts_out[0], 
+                counts_len, T_threshes[i], T_aff_merge, T_dust, T_merge, T_mst)
+            # for next iteration
+            seg_in = np.array(map['seg'], dtype='uint64')
+            counts_out = np.array(map['counts'], dtype='uint64')
+            counts_len = len(counts_out)
+            graph = np.array(map['rg'], dtype='float32')
+            rgn_graph = graph.reshape(len(graph) / 3, 3)
+
+            seg = seg_in.reshape((dims[2], dims[1], dims[0])).transpose(2, 1, 0)
+            if seg_save_path is None:
+                segs[i] = seg.copy()
+            else:
+                f = h5py.File(seg_save_path + '_' + str(T_threshes[i]) + '.h5', 'w')
+                ds = f.create_dataset('stack', seg.shape, compression="gzip", dtype=np.uint64)
+                ds[:] = seg
+                f.close()
+            print "\t number of regions: "+ str(len(np.unique(seg)))
+        if seg_save_path is None:
+            return segs
+
+# step-by-step
 def zw_steepest_ascent(np.ndarray[np.float32_t, ndim=4] aff,
                        low, high):
     cdef:

@@ -265,8 +265,8 @@ void do_mapping(
 	uint64_t s2 = sets.find_set(v2);
 	if (s1 == s2) continue;
 	if (counts[s1] + counts[s2] <= max_count) {
-	    sets.join(s1, s2);
-	    counts[s2] += counts[s1];
+	    uint64_t sjoin = sets.join(s1, s2);
+	    counts[sjoin] = counts[s1] + counts[s2];
 	}
     }
     uint64_t id=0;

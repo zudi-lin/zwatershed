@@ -28,6 +28,6 @@ representation: affinity -> segmentation -> region graph
     ```zw_merge_segments_with_function(seg, rg_affs, id1, id2, counts, T_size, T_weight, T_dust, T_merge, T_mst)``` 
     - mean-affinity: 
 
-## Example Scripts
+## Test Scripts
 - zwatershed: ```do_zwatershed.py```
 - mean-affinity agglomeration: ```mean_aff.py```

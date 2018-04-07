@@ -1,5 +1,4 @@
-#ifndef TESTLIB_H
-#define TESTLIB_H
+#pragma once
 
 #include <iostream>
 #include <list>
@@ -38,4 +37,14 @@ void merge_segments_with_function(
      const float weight_th,
      const size_t lowt,
      const float merge_th);
-#endif
+void mst(
+     std::vector<float> &rg_affs,
+     std::vector<uint64_t> &id1,
+     std::vector<uint64_t> &id2,
+     size_t max_id);
+void do_mapping(
+     std::vector<uint64_t> &id1,
+     std::vector<uint64_t> &id2,
+     std::vector<uint64_t> &counts,
+     std::vector<uint64_t> &mapping,
+     uint64_t max_count);

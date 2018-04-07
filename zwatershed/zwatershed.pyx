@@ -268,7 +268,73 @@ def zw_merge_segments_with_function(np.ndarray[np.uint64_t, ndim=3] seg,
     for 0 <= i < vcounts.size():
         out_counts[i] = vcounts[i]
     return out_counts, (out_rg_affs, out_id1, out_id2)
+
+def zw_mst(np.ndarray[np.float32_t, ndim=1] rg_affs,
+           np.ndarray[np.uint64_t, ndim=1] id1,
+           np.ndarray[np.uint64_t, ndim=1] id2,
+           size_t max_id):
+    '''Compute the maximum spanning tree of a region graph
     
+    :param rg_affs: region affinities ordered from largest to smallest
+    :param id1: the ID of the first region
+    :param id2: the ID of the second region
+    :returns: a 3-tuple of the reduced rg_affs, id1 and id2
+    '''
+    cdef:
+        vector[float] vrg_affs
+        vector[uint64_t] vid1
+        vector[uint64_t] vid2
+        size_t i
+        np.ndarray[np.float32_t, ndim=1] out_rg_affs
+        np.ndarray[np.uint64_t, ndim=1] out_id1
+        np.ndarray[np.uint64_t, ndim=1] out_id2
+    for 0 <= i < rg_affs.shape[0]:
+        vrg_affs.push_back(rg_affs[i])
+        vid1.push_back(id1[i])
+        vid2.push_back(id2[i])
+    mst(vrg_affs, vid1, vid2, max_id)
+    out_rg_affs = np.zeros(vrg_affs.size(), np.float32)
+    out_id1 = np.zeros(vrg_affs.size(), np.uint64)
+    out_id2 = np.zeros(vrg_affs.size(), np.uint64)
+    for 0 <= i < vrg_affs.size():
+        out_rg_affs[i] = vrg_affs[i]
+        out_id1[i] = vid1[i]
+        out_id2[i] = vid2[i]
+    return out_rg_affs, out_id1, out_id2
+
+def zw_do_mapping(np.ndarray[np.uint64_t, ndim=1] id1,
+                  np.ndarray[np.uint64_t, ndim=1] id2,
+                  np.ndarray[np.uint64_t, ndim=1] counts,
+                  size_t max_count):
+    '''Find the global mapping of IDs from the region graph
+    
+    The region graph should be ordered by decreasing affinity and truncated
+    at the affinity threshold.
+    :param id1: a 1D array of the lefthand side of the two adjacent regions
+    :param id2: a 1D array of the righthand side of the two adjacent regions
+    :param counts: the number of voxels per ID
+    :param max_count: the maximum number of voxels per object
+    :returns: a 1D array of the global IDs per local ID
+    '''
+    cdef:
+        vector[uint64_t] vcounts
+        vector[uint64_t] vid1
+        vector[uint64_t] vid2
+        vector[uint64_t] vmapping
+        size_t i
+        np.ndarray[np.uint64_t, ndim=1] mapping
+    
+    vmapping.resize(counts.shape[0])
+    for 0 <= i < id1.shape[0]:
+        vid1.push_back(id1[i])
+        vid2.push_back(id2[i])
+    for 0 <= i < counts.shape[0]:
+        vcounts.push_back(counts[i])
+    do_mapping(vid1, vid2, vcounts, vmapping, max_count)
+    mapping = np.zeros(vmapping.size(), np.uint64)
+    for 0 <= i < vmapping.size():
+        mapping[i] = vmapping[i]
+    return mapping
     
 #-------------- c++ methods --------------------------------------------------------------
 cdef extern from "zwatershed.h":
@@ -291,3 +357,14 @@ cdef extern from "zwatershed.h":
         PyObject *pyseg, vector[float] &rg_affs, vector[uint64_t] &id1,
         vector[uint64_t] &id2, vector[size_t] &counts, size_t size_th,
         float weight_th, size_t lowt, float merge_th)
+    void mst(
+     vector[float] &rg_affs,
+     vector[uint64_t] &id1,
+     vector[uint64_t] &id2,
+     size_t max_id)
+    void do_mapping(
+     vector[uint64_t] &id1,
+     vector[uint64_t] &id2,
+     vector[uint64_t] &counts,
+     vector[uint64_t] &mapping,
+     uint64_t max_count);

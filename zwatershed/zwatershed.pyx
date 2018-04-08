@@ -15,7 +15,7 @@ from cython.operator cimport dereference as deref, preincrement as inc
 def zwatershed(np.ndarray[np.float32_t, ndim=4] affs, 
                   T_threshes, T_aff=[0.01,0.8,0.2], T_aff_relative=True, 
                   T_dust=600, T_merge=0.5,
-                  seg_save_path=None):
+                  save_path=None):
     # aff stats
     affs = np.asfortranarray(np.transpose(affs, (1, 2, 3, 0)))
     dims = affs.shape
@@ -25,35 +25,43 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
     print "2. get initial seg"
     map = zw_initial_cpp(dims[0], dims[1], dims[2], &affs[0, 0, 0, 0], affs_thres[0], affs_thres[1])
 
-    cdef np.ndarray[uint64_t, ndim=1] seg_in = np.array(map['seg'],dtype='uint64')
-    cdef np.ndarray[uint64_t, ndim=1] counts_out = np.array(map['counts'],dtype='uint64')
-    cdef np.ndarray[np.float32_t, ndim=2] rgn_graph = np.array(map['rg'], dtype='float32').reshape(-1, 3)
+    cdef np.ndarray[uint64_t, ndim=1] in_seg = np.array(map['seg'],dtype='uint64')
+    cdef np.ndarray[uint64_t, ndim=1] in_counts = np.array(map['counts'],dtype='uint64')
+    cdef np.ndarray[np.float32_t, ndim=2] in_rg = np.array(map['rg'], dtype='float32').reshape(-1, 3)
 
     # get segs, stats
     T_threshes.sort()
-    segs = [None]*len(T_threshes)
+    out_seg = [None]*len(T_threshes)
+    out_rg = [None]*len(T_threshes)
+    out_counts = [None]*len(T_threshes)
     for i in range(len(T_threshes)):
         print "3. do thres: ", T_threshes[i], T_dust
-        if(len(rgn_graph) > 0):
+        if(len(in_rg) > 0):
             map = merge_region(
-                dims[0], dims[1], dims[2], &rgn_graph[0, 0],
-                rgn_graph.shape[0], &seg_in[0], &counts_out[0], 
-                len(counts_out), T_threshes[i], affs_thres[2], T_dust, T_merge)
-        counts_out = np.array(map['counts'], dtype='uint64')
-        seg_in = np.array(map['seg'], dtype='uint64')
-        rgn_graph = np.array(map['rg'], dtype='float32').reshape(-1, 3)
+                dims[0], dims[1], dims[2], &in_rg[0, 0],
+                in_rg.shape[0], &in_seg[0], &in_counts[0], 
+                len(in_counts), T_threshes[i], affs_thres[2], T_dust, T_merge)
+        in_seg = np.array(map['seg'], dtype='uint64')
+        in_rgn = np.array(map['rg'], dtype='float32').reshape(-1, 3)
+        in_counts = np.array(map['counts'], dtype='uint64')
 
-        seg = seg_in.reshape((dims[2], dims[1], dims[0])).transpose(2, 1, 0)
-        if seg_save_path is None:
-            segs[i] = seg.copy()
-        else:
-            f = h5py.File(seg_save_path + '_' + str(T_threshes[i]) + '.h5', 'w')
-            ds = f.create_dataset('stack', seg.shape, compression="gzip", dtype=np.uint64)
+        seg = in_seg.reshape((dims[2], dims[1], dims[0])).transpose(2, 1, 0)
+        if save_path is None:
+            out_seg[i] = seg.copy()
+            out_rg[i] = in_rg.copy()
+            out_counts[i] = in_counts.copy()
+        else: # in case out of memory
+            f = h5py.File(save_path + '_' + str(T_threshes[i]) + '.h5', 'w')
+            ds = f.create_dataset('seg', seg.shape, compression="gzip", dtype=np.uint32)
             ds[:] = seg.astype(np.uint32)
+            ds2 = f.create_dataset('rg', seg.shape, compression="gzip", dtype=np.uint32)
+            ds2[:] = in_rg.astype(np.uint32)
+            ds3 = f.create_dataset('counts', seg.shape, compression="gzip", dtype=np.uint32)
+            ds3[:] = in_counts.astype(np.uint32)
             f.close()
         print "\t number of regions: "+ str(len(np.unique(seg)))
-    if seg_save_path is None:
-        return segs
+    if save_path is None:
+        return out_seg, out_rg, out_counts
 
 #################################################
 # auxilary function for debug purpose
@@ -75,7 +83,7 @@ def zw_initial(np.ndarray[np.float32_t, ndim=4] affs, affs_low, affs_high):
 
 def zw_merge_region(np.ndarray[uint64_t, ndim=3] seg_init, np.ndarray[uint64_t, ndim=1] counts, 
                    np.ndarray[np.float32_t, ndim=2] rg, T_threshes, T_aff_merge=0.2, 
-                    T_dust=600, T_merge=0.5, seg_save_path=None):
+                    T_dust=600, T_merge=0.5, save_path=None):
     # get initial rg
     # input seg: z*y*x
     # internal seg: x*y*z
@@ -103,15 +111,15 @@ def zw_merge_region(np.ndarray[uint64_t, ndim=3] seg_init, np.ndarray[uint64_t, 
             rgn_graph = graph.reshape(len(graph) / 3, 3)
 
             seg = seg_in.reshape((dims[2], dims[1], dims[0])).transpose(2, 1, 0)
-            if seg_save_path is None:
+            if save_path is None:
                 segs[i] = seg.copy()
             else:
-                f = h5py.File(seg_save_path + '_' + str(T_threshes[i]) + '.h5', 'w')
+                f = h5py.File(save_path + '_' + str(T_threshes[i]) + '.h5', 'w')
                 ds = f.create_dataset('stack', seg.shape, compression="gzip", dtype=np.uint64)
                 ds[:] = seg
                 f.close()
             print "\t number of regions: "+ str(len(np.unique(seg)))
-        if seg_save_path is None:
+        if save_path is None:
             return segs
 
 # step-by-step

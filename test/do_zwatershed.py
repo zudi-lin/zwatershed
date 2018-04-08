@@ -57,5 +57,5 @@ if __name__ == "__main__" :
         T_aff_merge = p_prctile[int(np.floor(aff_thd[2]/0.05))] if T_rel else aff_thd[2]
         print "Performing watershed"
         zwatershed.zw_merge_region(seg, counts, rg,
-                                      thd, T_aff_merge=0.2,T_dust=dust_thd,
+                                      thd, T_aff_merge=T_aff_merge,T_dust=dust_thd,
                                       T_merge=float(T_merge),seg_save_path=save_out_pref)

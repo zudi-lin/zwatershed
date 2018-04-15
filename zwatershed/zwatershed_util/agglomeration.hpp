@@ -59,7 +59,7 @@ merge_segments_with_function(
             ++next_id;
         }
     }
-    std::cout<<"next_id: "<<counts.size()<<","<<next_id<<std::endl;
+    // std::cout<<"next_id: "<<counts.size()<<","<<next_id<<std::endl;
 
     counts.resize(next_id);
 
@@ -84,10 +84,14 @@ merge_segments_with_function(
 
     std::vector<std::set<ID>> in_rg(next_id);
 
+    //int cc=0;
+
     for ( auto& it: rg )
     {
         ID s1 = remaps[sets.find_set(std::get<1>(it))];
         ID s2 = remaps[sets.find_set(std::get<2>(it))];
+        // cc++;
+        //if (cc<10){std::cout<<std::get<1>(it)<<","<<std::get<2>(it)<<":"<<s1<<","<<s2<<std::endl;}
 
         if ( s1 != s2 && s1 && s2 )
         {
@@ -95,6 +99,7 @@ merge_segments_with_function(
             if ( in_rg[mm.first].count(mm.second) == 0 )
             {
                 // std::cout<<sets.find_set(std::get<1>(it))<<","<<sets.find_set(std::get<2>(it))<<","<<s1<<","<<s2<<std::endl;
+                // if (cc<10){std::cout<<std::get<0>(it)<<","<< mm.first<<","<< mm.second<<std::endl;}
                 new_rg.push_back(std::make_tuple(std::get<0>(it), mm.first, mm.second));
                 in_rg[mm.first].insert(mm.second);
             }

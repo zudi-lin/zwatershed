@@ -42,7 +42,7 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
                 in_rg.shape[0], &in_seg[0], &in_counts[0], 
                 len(in_counts), T_threshes[i], affs_thres[2], T_dust, T_merge)
         in_seg = np.array(map['seg'], dtype='uint64')
-        in_rgn = np.array(map['rg'], dtype='float32').reshape(-1, 3)
+        in_rg = np.array(map['rg'], dtype='float32').reshape(-1, 3)
         in_counts = np.array(map['counts'], dtype='uint64')
 
         seg = in_seg.reshape((dims[2], dims[1], dims[0])).transpose(2, 1, 0)

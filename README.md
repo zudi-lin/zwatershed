@@ -9,6 +9,8 @@
   version (with a bug fix)
 
 ## Install
+`conda install --yes --file requirements.txt` or `pip install -r requirements.txt`
+
 `python setup.py install`
 
 ## Package Functions

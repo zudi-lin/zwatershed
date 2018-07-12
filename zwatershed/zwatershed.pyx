@@ -19,7 +19,7 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
     # aff stats
     affs = np.asfortranarray(np.transpose(affs, (1, 2, 3, 0)))
     dims = affs.shape
-    affs_thres = np.percentile(affs, T_aff) if T_aff_relative else T_aff
+    affs_thres = np.percentile(affs, [t*100 for t in T_aff]) if T_aff_relative else T_aff
     print "1. affinity threshold: ", affs_thres
 
     print "2. get initial seg"

@@ -1,13 +1,5 @@
 # Cython version of Zwatershed
 
-## Resource
-- paper: http://arxiv.org/abs/1505.00249
-- original C++ version: https://bitbucket.org/poozh/watershed 
-- cython version: https://github.com/jakirkham/zwatershed
-- julia version: https://github.com/seung-lab/Watershed.jl
-- **ours**: start from the cython version and modify according to the julia
-  version (with a bug fix)
-
 ## Install
 `conda install --yes --file requirements.txt` or `pip install -r requirements.txt`
 
@@ -35,3 +27,11 @@ representation: affinity -> segmentation -> region graph
 ## Test Scripts
 - zwatershed: ```do_zwatershed.py```
 - mean-affinity agglomeration: ```mean_aff.py```
+
+## Resource
+- paper: http://arxiv.org/abs/1505.00249
+- original C++ version: https://bitbucket.org/poozh/watershed 
+- cython version: https://github.com/jakirkham/zwatershed
+- julia version: https://github.com/seung-lab/Watershed.jl
+- **ours**: start from the cython version and modify according to the julia
+  version (with a bug fix)

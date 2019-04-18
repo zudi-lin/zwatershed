@@ -22,7 +22,7 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
     affs_thres = np.percentile(affs, [t*100 for t in T_aff]) if T_aff_relative else T_aff
     print("1. affinity threshold: ", affs_thres)
 
-    prin( "2. get initial seg")
+    print("2. get initial seg")
     map = zw_initial_cpp(dims[0], dims[1], dims[2], &affs[0, 0, 0, 0], affs_thres[0], affs_thres[1])
 
     cdef np.ndarray[uint64_t, ndim=1] in_seg = np.array(map['seg'],dtype='uint64')
@@ -35,7 +35,7 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
     out_rg = [None]*len(T_threshes)
     out_counts = [None]*len(T_threshes)
     for i in range(len(T_threshes)):
-        print "3. do thres: ", T_threshes[i], T_dust
+        print("3. do thres: ", T_threshes[i], T_dust)
         if(len(in_rg) > 0):
             map = merge_region(
                 dims[0], dims[1], dims[2], &in_rg[0, 0],

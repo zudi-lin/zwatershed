@@ -51,7 +51,7 @@ def ma_merge_region(seg, rg_ma, thd):
     id2 = rg_ma[:,1].astype(seg.dtype)
 
     tomerge = np.where(rg_ma[:,2]>=float(thd))[0]
-    print "#to merge ", len(tomerge)
+    print("#to merge ", len(tomerge))
 
     seg_new = merge_label(seg, id1[tomerge], id2[tomerge])
     return seg_new

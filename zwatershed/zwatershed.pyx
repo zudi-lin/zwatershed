@@ -79,7 +79,7 @@ def zw_initial(np.ndarray[np.float32_t, ndim=4] affs, affs_low, affs_high):
     seg = np.array(map_init['seg'], dtype='uint64').reshape((dims[2], dims[1], dims[0])).transpose(2,1,0)
 
     return {'rg': rgn_graph, 'seg': seg,
-            'counts': np.array(map['counts'], dtype='uint64')}
+            'counts': np.array(map_init['counts'], dtype='uint64')}
 
 def zw_merge_region(np.ndarray[uint64_t, ndim=3] seg_init, np.ndarray[uint64_t, ndim=1] counts, 
                    np.ndarray[np.float32_t, ndim=2] rg, T_threshes, T_aff_merge=0.2, 

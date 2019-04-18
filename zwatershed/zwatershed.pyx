@@ -20,9 +20,9 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
     affs = np.asfortranarray(np.transpose(affs, (1, 2, 3, 0)))
     dims = affs.shape
     affs_thres = np.percentile(affs, [t*100 for t in T_aff]) if T_aff_relative else T_aff
-    print "1. affinity threshold: ", affs_thres
+    print("1. affinity threshold: ", affs_thres)
 
-    print "2. get initial seg"
+    prin( "2. get initial seg")
     map = zw_initial_cpp(dims[0], dims[1], dims[2], &affs[0, 0, 0, 0], affs_thres[0], affs_thres[1])
 
     cdef np.ndarray[uint64_t, ndim=1] in_seg = np.array(map['seg'],dtype='uint64')
@@ -59,7 +59,7 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
             ds3 = f.create_dataset('counts', seg.shape, compression="gzip", dtype=np.uint32)
             ds3[:] = in_counts.astype(np.uint32)
             f.close()
-        print "\t number of regions: "+ str(len(np.unique(seg)))
+        print("\t number of regions: "+ str(len(np.unique(seg))))
     if save_path is None:
         return out_seg, out_rg, out_counts
 

@@ -23,11 +23,11 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
     print("1. affinity threshold: ", affs_thres)
 
     print("2. get initial seg")
-    map = zw_initial_cpp(dims[0], dims[1], dims[2], &affs[0, 0, 0, 0], affs_thres[0], affs_thres[1])
+    map_init = zw_initial_cpp(dims[0], dims[1], dims[2], &affs[0, 0, 0, 0], affs_thres[0], affs_thres[1])
 
-    cdef np.ndarray[uint64_t, ndim=1] in_seg = np.array(map['seg'],dtype='uint64')
-    cdef np.ndarray[uint64_t, ndim=1] in_counts = np.array(map['counts'],dtype='uint64')
-    cdef np.ndarray[np.float32_t, ndim=2] in_rg = np.array(map['rg'], dtype='float32').reshape(-1, 3)
+    cdef np.ndarray[uint64_t, ndim=1] in_seg = np.array(map_init['seg'],dtype='uint64')
+    cdef np.ndarray[uint64_t, ndim=1] in_counts = np.array(map_init['counts'],dtype='uint64')
+    cdef np.ndarray[np.float32_t, ndim=2] in_rg = np.array(map_init['rg'], dtype='float32').reshape(-1, 3)
 
     # get segs, stats
     T_threshes.sort()
@@ -37,13 +37,13 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
     for i in range(len(T_threshes)):
         print("3. do thres: ", T_threshes[i], T_dust)
         if(len(in_rg) > 0):
-            map = merge_region(
+            map_init = merge_region(
                 dims[0], dims[1], dims[2], &in_rg[0, 0],
                 in_rg.shape[0], &in_seg[0], &in_counts[0], 
                 len(in_counts), T_threshes[i], affs_thres[2], T_dust, T_merge)
-        in_seg = np.array(map['seg'], dtype='uint64')
-        in_rg = np.array(map['rg'], dtype='float32').reshape(-1, 3)
-        in_counts = np.array(map['counts'], dtype='uint64')
+        in_seg = np.array(map_init['seg'], dtype='uint64')
+        in_rg = np.array(map_init['rg'], dtype='float32').reshape(-1, 3)
+        in_counts = np.array(map_init['counts'], dtype='uint64')
 
         seg = in_seg.reshape((dims[2], dims[1], dims[0])).transpose(2, 1, 0)
         if save_path is None:

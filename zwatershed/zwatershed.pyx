@@ -71,12 +71,12 @@ def zw_initial(np.ndarray[np.float32_t, ndim=4] affs, affs_low, affs_high):
     # affs: z*y*x*3
     affs = np.asfortranarray(np.transpose(affs, (1, 2, 3, 0)))
     dims = affs.shape
-    map = zw_initial_cpp(dims[0], dims[1], dims[2], &affs[0, 0, 0, 0], float(affs_low), float(affs_high))
+    map_init = zw_initial_cpp(dims[0], dims[1], dims[2], &affs[0, 0, 0, 0], float(affs_low), float(affs_high))
 
-    graph = np.array(map['rg'], dtype='float32')
+    graph = np.array(map_init['rg'], dtype='float32')
     rgn_graph = graph.reshape(len(graph) / 3, 3)
     # for output: seg.shape=[z*y*x]
-    seg = np.array(map['seg'], dtype='uint64').reshape((dims[2], dims[1], dims[0])).transpose(2,1,0)
+    seg = np.array(map_init['seg'], dtype='uint64').reshape((dims[2], dims[1], dims[0])).transpose(2,1,0)
 
     return {'rg': rgn_graph, 'seg': seg,
             'counts': np.array(map['counts'], dtype='uint64')}
@@ -99,15 +99,15 @@ def zw_merge_region(np.ndarray[uint64_t, ndim=3] seg_init, np.ndarray[uint64_t, 
     for i in range(len(T_threshes)):
         print "3. do thres: ", T_threshes[i], T_dust
         if(len(rgn_graph) > 0):
-            map = merge_region(
+            map_init = merge_region(
                 dims[0], dims[1], dims[2], &rgn_graph[0, 0],
                 rgn_graph.shape[0], &seg_in[0], &counts_out[0], 
                 counts_len, T_threshes[i], T_aff_merge, T_dust, T_merge)
             # for next iteration
-            seg_in = np.array(map['seg'], dtype='uint64')
-            counts_out = np.array(map['counts'], dtype='uint64')
+            seg_in = np.array(map_init['seg'], dtype='uint64')
+            counts_out = np.array(map_init['counts'], dtype='uint64')
             counts_len = len(counts_out)
-            graph = np.array(map['rg'], dtype='float32')
+            graph = np.array(map_init['rg'], dtype='float32')
             rgn_graph = graph.reshape(len(graph) / 3, 3)
 
             seg = seg_in.reshape((dims[2], dims[1], dims[0])).transpose(2, 1, 0)

@@ -12,8 +12,8 @@ from cpython.object cimport PyObject
 from cython.operator cimport dereference as deref, preincrement as inc
 
 #-------------- interface methods --------------------------------------------------------------
-def zwatershed(np.ndarray[np.float32_t, ndim=4] affs, 
-                  T_threshes, T_aff=[0.01,0.8,0.2], T_aff_relative=True, 
+def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
+                  T_threshes, T_aff=[0.01,0.8,0.2], T_aff_relative=True,
                   T_dust=600, T_merge=0.5,
                   save_path=None):
     # aff stats
@@ -25,9 +25,10 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
     print("2. get initial seg")
     map_init = zw_initial_cpp(dims[0], dims[1], dims[2], &affs[0, 0, 0, 0], affs_thres[0], affs_thres[1])
 
-    cdef np.ndarray[uint64_t, ndim=1] in_seg = np.array(map_init['seg'],dtype='uint64')
-    cdef np.ndarray[uint64_t, ndim=1] in_counts = np.array(map_init['counts'],dtype='uint64')
-    cdef np.ndarray[np.float32_t, ndim=2] in_rg = np.array(map_init['rg'], dtype='float32').reshape(-1, 3)
+    # -------- The following lines have been adapted for python 3 ----------
+    cdef np.ndarray[uint64_t, ndim=1] in_seg = np.array(map_init[b'seg'],dtype='uint64')
+    cdef np.ndarray[uint64_t, ndim=1] in_counts = np.array(map_init[b"counts"],dtype='uint64')
+    cdef np.ndarray[np.float32_t, ndim=2] in_rg = np.array(map_init[b"rg"], dtype='float32').reshape(-1, 3)
 
     # get segs, stats
     T_threshes.sort()
@@ -39,11 +40,13 @@ def zwatershed(np.ndarray[np.float32_t, ndim=4] affs,
         if(len(in_rg) > 0):
             map_init = merge_region(
                 dims[0], dims[1], dims[2], &in_rg[0, 0],
-                in_rg.shape[0], &in_seg[0], &in_counts[0], 
+                in_rg.shape[0], &in_seg[0], &in_counts[0],
                 len(in_counts), T_threshes[i], affs_thres[2], T_dust, T_merge)
-        in_seg = np.array(map_init['seg'], dtype='uint64')
-        in_rg = np.array(map_init['rg'], dtype='float32').reshape(-1, 3)
-        in_counts = np.array(map_init['counts'], dtype='uint64')
+
+        # -------- The following lines have been adapted for python 3 ----------
+        in_seg = np.array(map_init[b"seg"], dtype='uint64')
+        in_rg = np.array(map_init[b'rg'], dtype='float32').reshape(-1, 3)
+        in_counts = np.array(map_init[b'counts'], dtype='uint64')
 
         seg = in_seg.reshape((dims[2], dims[1], dims[0])).transpose(2, 1, 0)
         if save_path is None:
@@ -81,8 +84,8 @@ def zw_initial(np.ndarray[np.float32_t, ndim=4] affs, affs_low, affs_high):
     return {'rg': rgn_graph, 'seg': seg,
             'counts': np.array(map_init['counts'], dtype='uint64')}
 
-def zw_merge_region(np.ndarray[uint64_t, ndim=3] seg_init, np.ndarray[uint64_t, ndim=1] counts, 
-                   np.ndarray[np.float32_t, ndim=2] rg, T_threshes, T_aff_merge=0.2, 
+def zw_merge_region(np.ndarray[uint64_t, ndim=3] seg_init, np.ndarray[uint64_t, ndim=1] counts,
+                   np.ndarray[np.float32_t, ndim=2] rg, T_threshes, T_aff_merge=0.2,
                     T_dust=600, T_merge=0.5, save_path=None):
     # get initial rg
     # input seg: z*y*x
@@ -101,7 +104,7 @@ def zw_merge_region(np.ndarray[uint64_t, ndim=3] seg_init, np.ndarray[uint64_t, 
         if(len(rgn_graph) > 0):
             map_init = merge_region(
                 dims[0], dims[1], dims[2], &rgn_graph[0, 0],
-                rgn_graph.shape[0], &seg_in[0], &counts_out[0], 
+                rgn_graph.shape[0], &seg_in[0], &counts_out[0],
                 counts_len, T_threshes[i], T_aff_merge, T_dust, T_merge)
             # for next iteration
             seg_in = np.array(map_init['seg'], dtype='uint64')
@@ -144,7 +147,7 @@ def zw_find_basins(np.ndarray[np.uint64_t, ndim=3] seg):
         PyObject *pseg=<PyObject *>seg
         vector[uint64_t] counts
         size_t i
-    
+
     find_basins(pseg, counts)
     print counts.size()
     pycounts = np.zeros(counts.size(), np.uint64)
@@ -155,12 +158,12 @@ def zw_find_basins(np.ndarray[np.uint64_t, ndim=3] seg):
 def zw_get_region_graph(np.ndarray[np.float32_t, ndim=4] aff,
                         np.ndarray[np.uint64_t, ndim=3] seg):
     '''Return the initial region graph using max edge affinity.
-    
+
     :param aff: the affinity predictions - an array of x, y, z, c where c == 0
                 is the affinity prediction for x, c == 1 is the affinity
                 prediction for y and c == 2 is the affinity prediction for z
     :param seg: the segmentation after finding basins
-    :returns: a region graph as a 3-tuple of numpy 1-d arrays of affinity, 
+    :returns: a region graph as a 3-tuple of numpy 1-d arrays of affinity,
               ID1 and ID2
     '''
     cdef:
@@ -187,12 +190,12 @@ def zw_get_region_graph(np.ndarray[np.float32_t, ndim=4] aff,
 def zw_get_region_graph_average(np.ndarray[np.float32_t, ndim=4] aff,
                                 np.ndarray[np.uint64_t, ndim=3] seg):
     '''Return the initial region graph using average edge affinity
-    
+
     :param aff: the affinity predictions - an array of x, y, z, c where c == 0
                 is the affinity prediction for x, c == 1 is the affinity
                 prediction for y and c == 2 is the affinity prediction for z
     :param seg: the segmentation after finding basins
-    :returns: a region graph as a 3-tuple of numpy 1-d arrays of affinity, 
+    :returns: a region graph as a 3-tuple of numpy 1-d arrays of affinity,
               ID1 and ID2
     '''
     cdef:
@@ -205,7 +208,7 @@ def zw_get_region_graph_average(np.ndarray[np.float32_t, ndim=4] aff,
         np.ndarray[np.uint64_t, ndim=1] np_id1
         np.ndarray[np.uint64_t, ndim=1] np_id2
         size_t i
-    
+
     max_segid = seg.max()
     get_region_graph_average(paff, pseg, max_segid, rg_affs, id1, id2)
     np_rg_affs = np.zeros(rg_affs.size(), np.float32)
@@ -224,7 +227,7 @@ def zw_merge_segments_with_function(np.ndarray[np.uint64_t, ndim=3] seg,
                                        np.ndarray[np.uint64_t, ndim=1] counts,
                                        T_size, T_weight, T_dust, T_merge):
     '''Perform the agglomeration step
-    
+
     :param seg: the segmentation
     :param rg_affs: the affinities from the region graph 3-tuple
                     returned by zw_get_region_graph
@@ -252,7 +255,7 @@ def zw_merge_segments_with_function(np.ndarray[np.uint64_t, ndim=3] seg,
         np.ndarray[np.uint64_t, ndim=1] out_id1
         np.ndarray[np.uint64_t, ndim=1] out_id2
         np.ndarray[np.uint64_t, ndim=1] out_counts
-        
+
     assert len(id1) == len(rg_affs)
     assert len(id2) == len(rg_affs)
     for 0 <= i < rg_affs.shape[0]:
@@ -282,7 +285,7 @@ def zw_mst(np.ndarray[np.float32_t, ndim=1] rg_affs,
            np.ndarray[np.uint64_t, ndim=1] id2,
            size_t max_id):
     '''Compute the maximum spanning tree of a region graph
-    
+
     :param rg_affs: region affinities ordered from largest to smallest
     :param id1: the ID of the first region
     :param id2: the ID of the second region
@@ -315,7 +318,7 @@ def zw_do_mapping(np.ndarray[np.uint64_t, ndim=1] id1,
                   np.ndarray[np.uint64_t, ndim=1] counts,
                   size_t max_count):
     '''Find the global mapping of IDs from the region graph
-    
+
     The region graph should be ordered by decreasing affinity and truncated
     at the affinity threshold.
     :param id1: a 1D array of the lefthand side of the two adjacent regions
@@ -331,7 +334,7 @@ def zw_do_mapping(np.ndarray[np.uint64_t, ndim=1] id1,
         vector[uint64_t] vmapping
         size_t i
         np.ndarray[np.uint64_t, ndim=1] mapping
-    
+
     vmapping.resize(counts.shape[0])
     for 0 <= i < id1.shape[0]:
         vid1.push_back(id1[i])
@@ -343,7 +346,7 @@ def zw_do_mapping(np.ndarray[np.uint64_t, ndim=1] id1,
     for 0 <= i < vmapping.size():
         mapping[i] = vmapping[i]
     return mapping
-    
+
 #-------------- c++ methods --------------------------------------------------------------
 cdef extern from "zwatershed.h":
     map[string, list[float]] zw_initial_cpp(size_t dimX, size_t dimY, size_t dimZ, np.float32_t*affs,

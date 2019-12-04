@@ -1,5 +1,13 @@
 # Cython version of Zwatershed
 
+## The py3 branch of zwatershed allows you to run the demo notebook (pytorch_connectomics/demo/segmentation.ipynb) with python3
+1. A small change has been made to the file zwatershed.pyx by adding the byte encoding tag to dictionary keys
+     - fixed error message related to string and bytes encoding in cython, python 2 and python 3:
+     - Details about the issue: https://github.com/PySlurm/pyslurm/wiki/Strings-and-bytes-in-Cython
+     - example fix:
+`cdef np.ndarray[uint64_t, ndim=1] in_seg = np.array(map_init['seg'],dtype='uint64') -->  cdef np.ndarray[uint64_t, ndim=1] in_seg = np.array(map_init[b'seg'],dtype='uint64')`
+
+
 ## Install
 `conda install --yes --file requirements.txt` or `pip install -r requirements.txt`
 
